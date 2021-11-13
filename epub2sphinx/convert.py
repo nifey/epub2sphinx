@@ -1,9 +1,17 @@
 import ebooklib
+import os
 from ebooklib import epub
 
-def create_directory_structure(book):
+def create_directory_structure(output_directory):
     # Abort with error if a directory already exists
     # Else create directories for source and build
+    directory_list = os.listdir(output_directory)
+    directories_required=[ x for x in directory_list if "build"==x or "source"==x ]
+    if len(directories_required) >= 1:
+        error_message="These {} directories should not be present already" 
+        raise Exception(error_message.format(directories_required))
+    os.mkdir("source")
+    os.mkdir("build")
     pass
 
 def generate_conf(book):
