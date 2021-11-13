@@ -1,3 +1,4 @@
 click==8.0.3
 EbookLib==0.17.1
 pypandoc==1.6.4
+Django==3.2.9

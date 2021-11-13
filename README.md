@@ -13,3 +13,8 @@ epub2rst [-o output_directory] [-t sphinx_theme_name] file.epub
   ```bash
   python setup.py install
   ```
+
+# Running the server
+   ```bash
+  python manage.py runserver
+   ```

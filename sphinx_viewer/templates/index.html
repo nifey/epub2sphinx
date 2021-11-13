@@ -1,0 +1,5 @@
+<form method="POST" action={% url 'sphinx_viewer:epub2sphinx' %} enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="file" name="epub" />
+    <input type="submit" name="submit" value="Upload" />
+</form>
