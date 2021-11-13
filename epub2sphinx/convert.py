@@ -56,12 +56,19 @@ def generate_rst(book, source_directory):
             ch_file.write(rst_content)
 
 def generate_index(book, dest_dir):
+    # Get Author Name
+    try:
+      author = book.get_metadata('DC', 'creator')[0][0]
+    except:
+      author = ''
+
     # Generate index.rst
     with open(f"{dest_dir}/source/index.rst", 'w') as f:
         f.write(f"{book.title}\n")
         f.write("==============================\n\n")
-        f.write(f"Author: {book.get_metadata('DC', 'creator')[0][0]}\n\n")
-        f.write("==============================\n\n")
+        if author != '':
+            f.write(f"Author: {author}\n\n")
+            f.write("==============================\n\n")
         f.write(".. toctree::\n")
         f.write("   :maxdepth: 2\n")
         f.write("   :caption: Contents:\n")
