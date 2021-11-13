@@ -5,9 +5,16 @@ import re
 
 from ebooklib import epub
 
-def create_directory_structure(book):
+def create_directory_structure(output_directory,working_directories_to_be_created):
     # Abort with error if a directory already exists
     # Else create directories for source and build
+    is_directory_present = os.path.isdir(output_directory)
+    if is_directory_present:
+        error_message="The directory {} should not be present already"
+        raise Exception(error_message.format(output_directory))
+    for directory_name in working_directories_to_be_created:
+        path = os.path.join(output_directory,directory_name)
+        os.makedirs(path)
     pass
 
 def generate_conf(book):
@@ -63,7 +70,7 @@ def convert_epub(name, output_directory, sphinx_theme_name):
     # Read epub
     input_epub = epub.read_epub(name)
     # Create output directory structure
-    create_directory_structure(output_directory)
+    create_directory_structure(output_directory,["source","build"])
     # Generate conf.py
     generate_conf(input_epub)
     # Generate ReST file for each chapter in ebook
