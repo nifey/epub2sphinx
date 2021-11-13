@@ -7,7 +7,6 @@ import epub2sphinx
 @click.version_option()
 @click.argument('input_file',type=click.File("r"))
 def convert(output_directory,sphinx_theme_name,input_file):
-    ''' This tool helps you to convert your epub files into sphinx format for a better reading experience.'''
-    message = "Output directory : {} ; Theme : {} ; Input file : {}"
-    click.echo(message.format(output_directory,sphinx_theme_name,input_file))
+    ''' This tool helps you to convert your epub files into sphinx format for a better reading experience.
+        Kindly provide the epub file as the argument to this command.'''
     epub2sphinx.convert_epub(input_file.name,output_directory,sphinx_theme_name)
