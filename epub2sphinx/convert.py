@@ -2,6 +2,7 @@ import ebooklib
 import pypandoc
 import os
 import re
+import click
 
 from ebooklib import epub
 
@@ -76,9 +77,27 @@ def generate_index(book, dest_dir):
         f.write("   :glob:\n\n")
         f.write("   *\n")
 
-def extract_images(input_epub):
-    # Extract images from epub
-    pass
+
+def extract_images(input_epub, output_directory):
+    source_directory = os.path.join(output_directory, 'source/')
+
+    # save all media, xml, font files for the current book to its source directory
+    files = input_epub.get_items()
+    for book_file in files:
+        try:
+            directories = (source_directory + book_file.file_name).split('/')
+            if len(directories) > 1:
+                directory = "/".join(directories[:-1])
+                if not os.path.exists(directory):
+                    os.makedirs(directory)
+
+            # file.content is in bytes format
+            click.echo(os.path.join(source_directory, book_file.file_name))
+            with open(os.path.join(source_directory, book_file.file_name), 'wb') as image_file:
+                image_file.write(book_file.content)
+        except Exception as error:
+            click.echo(error)
+
 
 def convert_epub(name, output_directory, sphinx_theme_name):
     # Read epub
@@ -92,4 +111,4 @@ def convert_epub(name, output_directory, sphinx_theme_name):
     # Generate index.rst
     generate_index(input_epub, output_directory)
     # Extract images from epub
-    extract_images(input_epub)
+    extract_images(input_epub, output_directory)
