@@ -1,7 +1,9 @@
+import datetime
 import ebooklib
 import pypandoc
 import os
 import re
+import shutil
 import click
 
 from ebooklib import epub
@@ -16,11 +18,28 @@ def create_directory_structure(output_directory,working_directories_to_be_create
     for directory_name in working_directories_to_be_created:
         path = os.path.join(output_directory,directory_name)
         os.makedirs(path)
-    pass
 
-def generate_conf(book):
+def generate_conf(book, theme, source_directory):
     # Generate conf.py for sphinx by extracting title, author name, etc
-    pass
+    try:
+      author = book.get_metadata('DC', 'creator')[0][0]
+    except:
+      author = None
+    with open('templates/conf.py', 'r') as in_conf:
+        conf_contents = in_conf.read()
+
+    # Add Author, Theme, Copyright, Title
+    conf_contents = conf_contents.replace("<<<TITLE>>>", book.title)
+    conf_contents = conf_contents.replace("<<<THEME>>>", theme)
+    if author:
+        conf_contents = conf_contents.replace("<<<COPYRIGHT>>>", datetime.datetime.now().strftime("%Y") + " " + author)
+        conf_contents = conf_contents.replace("<<<AUTHOR>>>", author)
+    else:
+        conf_contents = conf_contents.replace("copyright = '<<<COPYRIGHT>>>'", "")
+        conf_contents = conf_contents.replace("author = '<<<AUTHOR>>>'", "")
+
+    with open(source_directory+'conf.py', 'x') as out_conf:
+        out_conf.write(conf_contents)
 
 def generate_rst(book, source_directory):
     # Generate ReST file for each chapter in ebook
@@ -105,7 +124,10 @@ def convert_epub(name, output_directory, sphinx_theme_name):
     # Create output directory structure
     create_directory_structure(output_directory,["source","build"])
     # Generate conf.py
-    generate_conf(input_epub)
+    generate_conf(input_epub, sphinx_theme_name, output_directory + '/source/')
+    # Copy Makefiles into output_directory
+    shutil.copyfile('templates/Makefile', output_directory + '/Makefile')
+    shutil.copyfile('templates/make.bat', output_directory + '/make.bat')
     # Generate ReST file for each chapter in ebook
     generate_rst(input_epub, output_directory + '/source/')
     # Generate index.rst
