@@ -55,9 +55,19 @@ def generate_rst(book, source_directory):
             # Write ReST content
             ch_file.write(rst_content)
 
-def generate_index(input_epub):
+def generate_index(book, dest_dir):
     # Generate index.rst
-    pass
+    with open(f"{dest_dir}/source/index.rst", 'w') as f:
+        f.write(f"{book.title}\n")
+        f.write("==============================\n\n")
+        f.write(f"Author: {book.get_metadata('DC', 'creator')[0][0]}\n\n")
+        f.write("==============================\n\n")
+        f.write(".. toctree::\n")
+        f.write("   :maxdepth: 2\n")
+        f.write("   :caption: Contents:\n")
+        f.write("   :name: maintoc\n")
+        f.write("   :glob:\n\n")
+        f.write("   *\n")
 
 def extract_images(input_epub):
     # Extract images from epub
@@ -73,6 +83,6 @@ def convert_epub(name, output_directory, sphinx_theme_name):
     # Generate ReST file for each chapter in ebook
     generate_rst(input_epub, output_directory + '/source/')
     # Generate index.rst
-    generate_index(input_epub)
+    generate_index(input_epub, output_directory)
     # Extract images from epub
     extract_images(input_epub)
