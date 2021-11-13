@@ -55,9 +55,6 @@ def generate_rst(book, source_directory):
             # Write ReST content
             ch_file.write(rst_content)
 
-    # Generate index.rst
-    generate_index(file_names)
-
 def generate_index(input_epub):
     # Generate index.rst
     pass
