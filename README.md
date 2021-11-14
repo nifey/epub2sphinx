@@ -3,8 +3,16 @@
 epub2sphinx is a tool to convert epub files to ReST for Sphinx.
 
 ## Usage
+
+### Syntax
 ```
-epub2sphinx [-o output_directory] [-t sphinx_theme_name] file.epub
+epub2sphinx [-o <output_directory_path>] [-t <sphinx_theme_name>] [-s|--server|-b|--build] [-c] <epub_file_name>
+
+```
+### Example
+```
+epub2sphinx -o /home/zylker/sphinx/output -t classic my_book.epub
+
 ```
 
 # Installation
