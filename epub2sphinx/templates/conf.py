@@ -38,6 +38,8 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
 
+# Always use index.rst as the root document
+root_doc = 'index'
 
 # -- Options for HTML output -------------------------------------------------
 
