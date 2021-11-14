@@ -126,6 +126,10 @@ class Converter:
             f.write("   :name: maintoc\n\n")
             for chapter in self.toctree:
                 f.write(f"   {chapter}\n")
+            f.write("\nIndices\n")
+            f.write("==============================\n\n")
+            f.write("* :ref:`genindex`\n")
+            f.write("* :ref:`search`")
 
     def extract_images(self):
         # save all media, xml, font files for the current book to its source directory
