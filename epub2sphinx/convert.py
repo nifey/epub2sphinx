@@ -24,7 +24,7 @@ class Converter:
 
     def convert(self):
         # Create output directory structure
-        click.echo("Creating directory structure")
+        click.echo("\nCreating directory structure")
         self.create_directory_structure(["source","build","source/_static"])
         # Generate conf.py
         click.echo("Generating conf.py")
@@ -128,9 +128,9 @@ class Converter:
         files = self.epub.get_items()
         for book_file in files:
             try:
-                directories = (self.source_directory + book_file.file_name).split('/')
+                directories = (os.path.join(self.source_directory, book_file.file_name)).split(os.path.sep)
                 if len(directories) > 1:
-                    directory = "/".join(directories[:-1])
+                    directory = os.path.sep.join(directories[:-1])
                     if not os.path.exists(directory):
                         os.makedirs(directory)
 
