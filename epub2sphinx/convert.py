@@ -15,6 +15,7 @@ class Converter:
         self.file = file_name
         self.output_directory = output_directory
         self.source_directory = os.path.join(output_directory, 'source')
+        self.static_files_directory = os.path.join(self.source_directory, '_static')
         self.theme = sphinx_theme_name
 
         self.epub = epub.read_epub(file_name)
@@ -148,16 +149,33 @@ class Converter:
     def extract_images(self):
         # save all media, xml, font files for the current book to its source directory
         files = self.epub.get_items()
+        html_css_files = []
+
         for book_file in files:
+            if book_file.media_type == 'application/xhtml+xml':
+                continue
             try:
+                file_name = os.path.split(book_file.file_name)[-1]
+
                 directories = (os.path.join(self.source_directory, book_file.file_name)).split(os.path.sep)
                 if len(directories) > 1:
                     directory = os.path.sep.join(directories[:-1])
                     if not os.path.exists(directory):
                         os.makedirs(directory)
 
+                file_path = os.path.join(self.source_directory, book_file.file_name)
+                if book_file.media_type == 'text/css':
+                    # write css files to the _static directory
+                    file_path = os.path.join(self.static_files_directory, file_name)
+                    html_css_files.append(file_name)
+
                 # file.content is in bytes format
-                with open(os.path.join(self.source_directory, book_file.file_name), 'wb') as image_file:
-                    image_file.write(book_file.content)
+                with open(file_path, 'wb') as ext_file:
+                    ext_file.write(book_file.content)
             except Exception as error:
                 click.echo(error)
+
+        # include the css file paths to the conf file
+        if html_css_files:
+            with open(os.path.join(self.source_directory, 'conf.py'), 'a') as conf_file:
+                conf_file.write(f"html_css_files = {html_css_files}")
