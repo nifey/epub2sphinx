@@ -1,26 +1,60 @@
 # epub2sphinx
 
-epub2sphinx is a tool to convert epub files to ReST for Sphinx.
+epub2sphinx is a tool to convert epub files to ReST for [Sphinx](https://www.sphinx-doc.org/).
+
+It uses [Pandoc](https://pandoc.org/) for converting HTML data inside epub files into ReST.
+
+It creates a directory structure similar to what `sphinx-quickstart` generates by default.
 
 ## Usage
-
-### Syntax
 ```
-epub2sphinx [-o <output_directory_path>] [-t <sphinx_theme_name>] [-s|--server|-b|--build] [-c] <epub_file_name>
+Usage: epub2sphinx [-o <output_directory_path>] [-t <sphinx_theme_name>] [-s|--server|-b|--build] [-c] <epub_file_name>
 
+  This tool helps you to convert your epub files into sphinx format for a better reading experience.
+  Kindly provide the epub file as the argument to this command.
+
+Options:
+  -o, --output-directory PATH  The name of the output directory where the ReST file will be generated.
+                               Kindly make sure that the given directory is not existing already.
+  -t, --theme TEXT             The name of the sphinx theme.You can check for the available themes at:
+                               <https://www.sphinx-doc.org/en/master/usage/theming.html#builtin-themes>
+  -b, --build                  Build HTML from the generated ReST files using Sphinx.
+                               Sphinx has to be installed for this to work.
+  -s, --serve                  Build HTML using Sphinx and Serve the files on localhost.
+                               Sphinx has to be installed for this to work.
+  -c, --include-custom-css     Include the custom CSS from the EPUB for the HTML output
+  --help                       Show this message and exit.
 ```
 ### Example
 ```
-epub2sphinx -o /home/zylker/sphinx/output -t classic my_book.epub
+epub2sphinx -o out_dir -t classic my_book.epub
 
+# To generate HTML files using Sphinx
+cd out_dir
+make html
 ```
 
 # Installation
 - Install pandoc
+  ```bash
+  # On Ubuntu
+  sudo apt-get install pandoc
+  # On Arch Linux
+  pacman -S pandoc
+  ```
+  For installing on other platforms, look ![here](https://pandoc.org/installing.html).
+
 - Install epub2sphinx
   ```bash
   python setup.py install
   ```
+
+- Install Sphinx
+  epub2sphinx can generate ReST files without Sphinx, but Sphinx is used to build the HTML files if --build or --serve flags are used.
+  ```bash
+  pip3 install sphinx
+  ```
+
 ![GitHub](https://img.shields.io/github/license/nifey/epub2sphinx)
 ![GitHub issues](https://img.shields.io/github/issues/nifey/epub2sphinx)
 ![GitHub forks](https://img.shields.io/github/forks/nifey/epub2sphinx?style=social)
