@@ -12,7 +12,9 @@ def get_file_name(individual_file):
 @click.option('-t','--theme','sphinx_theme_name',default="alabaster",type=str,prompt=True,help=constants.cli_option_theme_help)
 @click.version_option()
 @click.argument('input_file',type=click.File("r"))
-def convert(output_directory,sphinx_theme_name,input_file):
+@click.option('-s', '--serve', prompt=True, type=bool, default='n', help="Serve the file on localhost")
+
+def convert(output_directory,sphinx_theme_name,input_file, serve):
     '''\b
         This tool helps you to convert your epub files into sphinx format for a better reading experience.
         Kindly provide the epub file as the argument to this command.
@@ -20,5 +22,5 @@ def convert(output_directory,sphinx_theme_name,input_file):
     input_files= [input_file]
     with click.progressbar(input_files,label="converting to sphinx",item_show_func=get_file_name) as bar:
         for individual_file in bar:
-            c = epub2sphinx.Converter(individual_file.name,output_directory,sphinx_theme_name.lower())
+            c = epub2sphinx.Converter(individual_file.name,output_directory,sphinx_theme_name.lower(), serve)
             c.convert()
