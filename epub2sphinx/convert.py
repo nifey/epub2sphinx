@@ -1,4 +1,6 @@
 import datetime
+import subprocess
+
 import ebooklib
 import pypandoc
 import os
@@ -11,7 +13,7 @@ from ebooklib import epub
 templates_directory = os.path.join(os.path.abspath(os.path.dirname(__file__)), "templates")
 
 class Converter:
-    def __init__(self, file_name, output_directory, sphinx_theme_name):
+    def __init__(self, file_name, output_directory, sphinx_theme_name, serve):
         self.file = file_name
         self.output_directory = output_directory
         self.source_directory = os.path.join(output_directory, 'source')
@@ -29,6 +31,7 @@ class Converter:
           self.rights = self.epub.get_metadata('DC', 'rights')[0][0]
         except:
           self.rights = None
+        self.serve = serve
 
     def convert(self):
         # Create output directory structure
@@ -52,6 +55,18 @@ class Converter:
         # Extract images from epub
         click.echo("Extracting images")
         self.extract_images()
+
+        if self.serve:
+            # serve the book on localhost
+            os.chdir(self.output_directory)
+            build_failed = subprocess.call(["make html"], shell=True, stdout=subprocess.PIPE)
+            if not build_failed:
+                html_path = os.path.join('build', 'html')
+                if os.path.isdir(html_path):
+                    os.chdir(html_path)
+                    subprocess.call(["python -m http.server --bind 127.0.0.1"], shell=True)
+                else:
+                    click.echo("Build Failed: Something went wrong!")
 
     def create_directory_structure(self, working_directories_to_be_created):
         # Abort with error if a directory already exists
