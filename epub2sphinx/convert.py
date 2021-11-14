@@ -11,12 +11,13 @@ from ebooklib import epub
 templates_directory = os.path.join(os.path.abspath(os.path.dirname(__file__)), "templates")
 
 class Converter:
-    def __init__(self, file_name, output_directory, sphinx_theme_name):
+    def __init__(self, file_name, output_directory, sphinx_theme_name,include_custom_css):
         self.file = file_name
         self.output_directory = output_directory
         self.source_directory = os.path.join(output_directory, 'source')
         self.static_files_directory = os.path.join(self.source_directory, '_static')
         self.theme = sphinx_theme_name
+        self.include_custom_css = include_custom_css
 
         self.epub = epub.read_epub(file_name)
         self.title = self.epub.title
@@ -170,10 +171,12 @@ class Converter:
 
                 file_path = os.path.join(self.source_directory, book_file.file_name)
                 if book_file.media_type == 'text/css':
-                    # write css files to the _static directory
-                    file_path = os.path.join(self.static_files_directory, file_name)
-                    html_css_files.append(file_name)
-
+                    if self.include_custom_css:
+                        # write css files to the _static directory
+                        file_path = os.path.join(self.static_files_directory, file_name)
+                        html_css_files.append(file_name)
+                    else:
+                        continue
                 # file.content is in bytes format
                 with open(file_path, 'wb') as ext_file:
                     ext_file.write(book_file.content)

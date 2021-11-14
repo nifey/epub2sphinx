@@ -12,3 +12,6 @@ cli_option_build_help = """\b
 Build HTML from the generated ReST files using Sphinx.
 Sphinx has to be installed for this to work.
 """
+cli_option_css_help = """\b
+Include the custom CSS from the EPUB for the HTML output
+"""
