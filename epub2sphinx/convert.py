@@ -10,7 +10,11 @@ from ebooklib import epub
 
 templates_directory = os.path.join(os.path.abspath(os.path.dirname(__file__)), "templates")
 
+def escape_quotes(text):
+    return text.replace("'","\\'").replace('"','\\"')
+
 class Converter:
+
     def __init__(self, file_name, output_directory, sphinx_theme_name,include_custom_css):
         self.file = file_name
         self.output_directory = output_directory
@@ -21,13 +25,17 @@ class Converter:
 
         self.epub = epub.read_epub(file_name)
         self.title = self.epub.title
+
+        if self.title:
+            self.title = escape_quotes(self.title)
+
         self.toctree = []
         try:
-          self.author = self.epub.get_metadata('DC', 'creator')[0][0]
+          self.author = escape_quotes(self.epub.get_metadata('DC', 'creator')[0][0])
         except:
           self.author = None
         try:
-          self.rights = self.epub.get_metadata('DC', 'rights')[0][0]
+          self.rights = escape_quotes(self.epub.get_metadata('DC', 'rights')[0][0])
         except:
           self.rights = None
 
@@ -65,6 +73,7 @@ class Converter:
         for directory_name in working_directories_to_be_created:
             path = os.path.join(self.output_directory,directory_name)
             os.makedirs(path)
+
 
     def generate_conf(self):
         # Generate conf.py for sphinx by extracting title, author name, etc
