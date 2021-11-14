@@ -61,10 +61,9 @@ make html
 
 [Project Gutenberg online read](https://www.gutenberg.org/cache/epub/98/pg98-images.html#link2H_4_0002) vs Sphinx generated output
 
-![image](https://user-images.githubusercontent.com/24192122/141684776-4a1e5012-7d11-4f82-a25b-2cfe8374ae87.png)
-
 ![image](https://user-images.githubusercontent.com/24192122/141684781-d7259e32-9055-4f68-9d0c-32475d350f8d.png)
 
+![image](https://user-images.githubusercontent.com/24192122/141684776-4a1e5012-7d11-4f82-a25b-2cfe8374ae87.png)
 
 ## Usecase
 
