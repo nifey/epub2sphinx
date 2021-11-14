@@ -22,6 +22,7 @@ It creates a directory structure similar to what `sphinx-quickstart` generates b
   ```
 
 - Install Sphinx
+
   epub2sphinx can generate ReST files without Sphinx, but Sphinx is used to build the HTML files if --build or --serve flags are used.
   ```bash
   pip3 install sphinx
@@ -44,6 +45,7 @@ Options:
   -s, --serve                  Build HTML using Sphinx and Serve the files on localhost.
                                Sphinx has to be installed for this to work.
   -c, --include-custom-css     Include the custom CSS from the EPUB for the HTML output
+  --version                    Show the version and exit.
   --help                       Show this message and exit.
 ```
 ### Example
