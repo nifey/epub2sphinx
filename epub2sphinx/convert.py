@@ -11,7 +11,8 @@ from ebooklib import epub
 templates_directory = os.path.join(os.path.abspath(os.path.dirname(__file__)), "templates")
 
 def escape_quotes(text):
-    return text.replace("'","\\'").replace('"','\\"')
+    if text is not None:
+        return text.replace("'","\\'").replace('"','\\"')
 
 class Converter:
 
@@ -24,10 +25,7 @@ class Converter:
         self.include_custom_css = include_custom_css
 
         self.epub = epub.read_epub(file_name)
-        self.title = self.epub.title
-
-        if self.title:
-            self.title = escape_quotes(self.title)
+        self.title = escape_quotes(self.epub.title)
 
         self.toctree = []
         try:
