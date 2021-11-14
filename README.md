@@ -6,6 +6,27 @@ It uses [Pandoc](https://pandoc.org/) for converting HTML data inside epub files
 
 It creates a directory structure similar to what `sphinx-quickstart` generates by default.
 
+## Installation
+- Install pandoc
+  ```bash
+  # On Ubuntu
+  sudo apt-get install pandoc
+  # On Arch Linux
+  pacman -S pandoc
+  ```
+  For installing on other platforms, look [here](https://pandoc.org/installing.html).
+
+- Install epub2sphinx
+  ```bash
+  python setup.py install
+  ```
+
+- Install Sphinx
+  epub2sphinx can generate ReST files without Sphinx, but Sphinx is used to build the HTML files if --build or --serve flags are used.
+  ```bash
+  pip3 install sphinx
+  ```
+
 ## Usage
 ```
 Usage: epub2sphinx [-o <output_directory_path>] [-t <sphinx_theme_name>] [-s|--server|-b|--build] [-c] <epub_file_name>
@@ -34,26 +55,12 @@ cd out_dir
 make html
 ```
 
-# Installation
-- Install pandoc
-  ```bash
-  # On Ubuntu
-  sudo apt-get install pandoc
-  # On Arch Linux
-  pacman -S pandoc
-  ```
-  For installing on other platforms, look ![here](https://pandoc.org/installing.html).
+## Usecase
 
-- Install epub2sphinx
-  ```bash
-  python setup.py install
-  ```
-
-- Install Sphinx
-  epub2sphinx can generate ReST files without Sphinx, but Sphinx is used to build the HTML files if --build or --serve flags are used.
-  ```bash
-  pip3 install sphinx
-  ```
+epub2sphinx can be used to convert public domain or CC-licensed epub files into static web pages that allows people to read them online.
+This will be useful for sites like [Project Gutenberg](https://www.gutenberg.org) or [FreeTamilEbooks](https://freetamilebooks.com/).
+Eventhough Project Gutenberg has an option to read online, it is very plain.
+Using Sphinx allows us to make use of any [default](https://www.sphinx-doc.org/en/master/usage/theming.html#builtin-themes) or [custom](https://sphinx-themes.org/) sphinx theme to make it look better.
 
 ![GitHub](https://img.shields.io/github/license/nifey/epub2sphinx)
 ![GitHub issues](https://img.shields.io/github/issues/nifey/epub2sphinx)
