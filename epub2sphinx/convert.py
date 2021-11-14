@@ -78,6 +78,7 @@ class Converter:
     def generate_rst(self):
         # Generate ReST file for each chapter in ebook
         rubric_pattern = re.compile(r"\brubric::[ ]+(.+)\n")
+        href_pattern = re.compile(r"(href=[\"\'][\w/.]*html)([#\'\"])")
         for chapter in self.epub.spine:
             chapter_item = self.epub.get_item_with_id(chapter[0])
             file_name = chapter_item.get_name()
@@ -89,7 +90,8 @@ class Converter:
             os.makedirs(os.path.dirname(os.path.join(self.source_directory, file_name)), exist_ok=True)
 
             # Convert HTML to ReST
-            html_content = chapter_item.get_content()
+            html_content = chapter_item.get_content().decode()
+            html_content = re.sub(href_pattern, r"\1.html\2", html_content)
             rst_content = pypandoc.convert_text(html_content, 'rst', format='html')
 
             matches = re.findall(rubric_pattern, rst_content)
