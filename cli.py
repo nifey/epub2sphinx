@@ -17,4 +17,5 @@ def convert(output_directory,sphinx_theme_name,input_file):
     input_files= [input_file]
     with click.progressbar(input_files,label="converting to sphinx",item_show_func=get_file_name) as bar:
         for individual_file in bar:
-            epub2sphinx.convert_epub(individual_file.name,output_directory,sphinx_theme_name.lower())
+            c = epub2sphinx.Converter(individual_file.name,output_directory,sphinx_theme_name.lower())
+            c.convert()
