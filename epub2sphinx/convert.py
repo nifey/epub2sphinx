@@ -170,12 +170,13 @@ class Converter:
                         os.makedirs(directory)
 
                 file_path = os.path.join(self.source_directory, book_file.file_name)
-                if self.include_custom_css:
-                    if book_file.media_type == 'text/css':
+                if book_file.media_type == 'text/css':
+                    if self.include_custom_css:
                         # write css files to the _static directory
                         file_path = os.path.join(self.static_files_directory, file_name)
                         html_css_files.append(file_name)
-
+                    else:
+                        continue
                 # file.content is in bytes format
                 with open(file_path, 'wb') as ext_file:
                     ext_file.write(book_file.content)
