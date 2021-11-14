@@ -17,6 +17,7 @@ class Converter:
 
         self.epub = epub.read_epub(file_name)
         self.title = self.epub.title
+        self.toctree = []
         try:
           self.author = self.epub.get_metadata('DC', 'creator')[0][0]
         except:
@@ -76,14 +77,13 @@ class Converter:
 
     def generate_rst(self):
         # Generate ReST file for each chapter in ebook
-        file_names = []
         rubric_pattern = re.compile(r"\brubric::[ ]+(.+)\n")
         for chapter in self.epub.spine:
             chapter_item = self.epub.get_item_with_id(chapter[0])
-
-            # Save filename for adding to index.rst's toctree
             file_name = chapter_item.get_name()
-            file_names.append(file_name)
+
+            # Add filename to toctree
+            self.toctree.append(file_name)
 
             # Create any parent directories as given in the filename
             os.makedirs(os.path.dirname(os.path.join(self.source_directory, file_name)), exist_ok=True)
