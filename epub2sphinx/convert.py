@@ -24,6 +24,10 @@ class Converter:
           self.author = self.epub.get_metadata('DC', 'creator')[0][0]
         except:
           self.author = None
+        try:
+          self.rights = self.epub.get_metadata('DC', 'rights')[0][0]
+        except:
+          self.rights = None
 
     def convert(self):
         # Create output directory structure
@@ -68,11 +72,15 @@ class Converter:
         conf_contents = conf_contents.replace("<<<TITLE>>>", self.title)
         conf_contents = conf_contents.replace("<<<THEME>>>", self.theme)
         if self.author:
-            conf_contents = conf_contents.replace("<<<COPYRIGHT>>>", datetime.datetime.now().strftime("%Y") + " " + self.author)
             conf_contents = conf_contents.replace("<<<AUTHOR>>>", self.author)
         else:
-            conf_contents = conf_contents.replace("copyright = '<<<COPYRIGHT>>>'", "")
             conf_contents = conf_contents.replace("author = '<<<AUTHOR>>>'", "")
+        if self.rights:
+            conf_contents = conf_contents.replace("<<<COPYRIGHT>>>", self.rights)
+        elif self.author:
+            conf_contents = conf_contents.replace("<<<COPYRIGHT>>>", datetime.datetime.now().strftime("%Y") + " " + self.author)
+        else:
+            conf_contents = conf_contents.replace("copyright = '<<<COPYRIGHT>>>'", "")
 
         with open(os.path.join(self.source_directory,'conf.py'), 'x') as out_conf:
             out_conf.write(conf_contents)
@@ -80,7 +88,7 @@ class Converter:
     def generate_rst(self):
         # Generate ReST file for each chapter in ebook
         rubric_pattern = re.compile(r"\brubric::[ ]+(.+)\n")
-        href_pattern = re.compile(r"(href=[\"\'][\w/.]*html)([#\'\"])")
+        href_pattern = re.compile(r"(href=[\"\'][\w/.@-]*html)([#\'\"])")
         for chapter in self.epub.spine:
             chapter_item = self.epub.get_item_with_id(chapter[0])
             file_name = chapter_item.get_name()
@@ -94,14 +102,20 @@ class Converter:
             # Convert HTML to ReST
             html_content = chapter_item.get_content().decode()
             html_content = re.sub(href_pattern, r"\1.html\2", html_content)
+            if html_content.find("epub:type") != -1:
+                self.toctree.remove(file_name)
+                continue
             rst_content = pypandoc.convert_text(html_content, 'rst', format='html')
 
             matches = re.findall(rubric_pattern, rst_content)
-            if len(matches) == 0:
-                # TODO Check the headings in the file for chapter title
-                chapter_title = "Chapter"
-            else:
+            if isinstance(chapter_item, epub.EpubNav):
+                self.toctree.remove(file_name)
+                continue
+            elif len(matches) != 0:
                 chapter_title = matches[0]
+            else:
+                # TODO Check the headings in the file for chapter title
+                chapter_title = "Front page"
 
             with open(os.path.join(self.source_directory, file_name + '.rst'), 'x') as ch_file:
                 # Add Chapter title
