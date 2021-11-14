@@ -15,6 +15,7 @@ def get_file_name(individual_file):
 @click.option('-b', '--build', 'post_conversion', flag_value='build', help=constants.cli_option_build_help)
 @click.option('-s', '--serve', 'post_conversion', flag_value='serve', help=constants.cli_option_serve_help)
 @click.option('-c', '--include-custom-css',is_flag=True, help=constants.cli_option_css_help)
+@click.version_option(package_name='epub2sphinx')
 def convert(output_directory,sphinx_theme_name,input_file, post_conversion,include_custom_css):
     '''\b
         This tool helps you to convert your epub files into sphinx format for a better reading experience.
