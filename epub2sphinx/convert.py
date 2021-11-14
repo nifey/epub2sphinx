@@ -8,6 +8,8 @@ import click
 
 from ebooklib import epub
 
+templates_directory = os.path.join(os.path.abspath(os.path.dirname(__file__)), "templates")
+
 class Converter:
     def __init__(self, file_name, output_directory, sphinx_theme_name):
         self.file = file_name
@@ -32,9 +34,9 @@ class Converter:
         self.generate_conf()
         # Copy Makefiles into output_directory
         click.echo("Copying Makefiles")
-        shutil.copyfile(os.path.join('templates','Makefile'),
+        shutil.copyfile(os.path.join(templates_directory,'Makefile'),
                         os.path.join(self.output_directory, 'Makefile'))
-        shutil.copyfile(os.path.join('templates','make.bat'),
+        shutil.copyfile(os.path.join(templates_directory,'make.bat'),
                         os.path.join(self.output_directory, 'make.bat'))
         # Generate ReST file for each chapter in ebook
         click.echo("Generating ReST files")
@@ -59,7 +61,7 @@ class Converter:
 
     def generate_conf(self):
         # Generate conf.py for sphinx by extracting title, author name, etc
-        with open('templates/conf.py', 'r') as in_conf:
+        with open(os.path.join(templates_directory, 'conf.py'), 'r') as in_conf:
             conf_contents = in_conf.read()
 
         # Add Author, Theme, Copyright, Title

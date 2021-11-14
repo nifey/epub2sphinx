@@ -11,6 +11,7 @@ setup(
     url = 'https://github.com/nifey/epub2sphinx',
     py_modules = ['cli', 'epub2sphinx'],
     packages = find_packages(),
+    package_data={'epub2sphinx': ['templates/*']},
     install_requires = [requirements],
     entry_points = '''
         [console_scripts]
