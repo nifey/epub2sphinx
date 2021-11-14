@@ -57,6 +57,13 @@ cd out_dir
 make html
 ```
 
+## Usecase
+
+epub2sphinx can be used to convert public domain or CC-licensed epub files into static web pages that allows people to read them online.
+This will be useful for sites like [Project Gutenberg](https://www.gutenberg.org) or [FreeTamilEbooks](https://freetamilebooks.com/).
+Eventhough Project Gutenberg has an option to read online, it is very plain.
+Using Sphinx allows us to make use of any [default](https://www.sphinx-doc.org/en/master/usage/theming.html#builtin-themes) or [custom](https://sphinx-themes.org/) sphinx theme to make it look better.
+
 ## Screenshots of comparison
 
 [Project Gutenberg online read](https://www.gutenberg.org/cache/epub/98/pg98-images.html#link2H_4_0002) vs Sphinx generated output
@@ -64,13 +71,6 @@ make html
 ![image](https://user-images.githubusercontent.com/24192122/141684781-d7259e32-9055-4f68-9d0c-32475d350f8d.png)
 
 ![image](https://user-images.githubusercontent.com/24192122/141684776-4a1e5012-7d11-4f82-a25b-2cfe8374ae87.png)
-
-## Usecase
-
-epub2sphinx can be used to convert public domain or CC-licensed epub files into static web pages that allows people to read them online.
-This will be useful for sites like [Project Gutenberg](https://www.gutenberg.org) or [FreeTamilEbooks](https://freetamilebooks.com/).
-Eventhough Project Gutenberg has an option to read online, it is very plain.
-Using Sphinx allows us to make use of any [default](https://www.sphinx-doc.org/en/master/usage/theming.html#builtin-themes) or [custom](https://sphinx-themes.org/) sphinx theme to make it look better.
 
 
 ![GitHub](https://img.shields.io/github/license/nifey/epub2sphinx)
