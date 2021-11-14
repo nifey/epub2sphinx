@@ -91,6 +91,7 @@ class Converter:
         # Generate ReST file for each chapter in ebook
         rubric_pattern = re.compile(r"\brubric::[ ]+(.+)\n")
         href_pattern = re.compile(r"(href=[\"\'][\w/.@-]*html)([#\'\"])")
+        svg_pattern = re.compile(r"\<svg[^\>]*\>(.*)\</svg\>", re.MULTILINE|re.DOTALL)
         for chapter in self.epub.spine:
             chapter_item = self.epub.get_item_with_id(chapter[0])
             file_name = chapter_item.get_name()
@@ -107,6 +108,9 @@ class Converter:
             if html_content.find("epub:type") != -1:
                 self.toctree.remove(file_name)
                 continue
+            if html_content.find("<svg") != -1:
+                html_content = re.sub(svg_pattern, r"\1", html_content)
+                html_content = html_content.replace("<image", "<img").replace("xlink:href", "src")
             rst_content = pypandoc.convert_text(html_content, 'rst', format='html')
 
             matches = re.findall(rubric_pattern, rst_content)
