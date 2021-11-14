@@ -137,7 +137,7 @@ class Converter:
         # Generate index.rst
         with open(os.path.join(self.source_directory,"index.rst"), 'w') as f:
             f.write(f"{self.title}\n")
-            f.write("==============================\n\n")
+            f.write(f"{'='*len(self.title)}\n\n")
             if self.author:
                 f.write(f"Author: {self.author}\n\n")
                 f.write("==============================\n\n")
