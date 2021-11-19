@@ -149,14 +149,13 @@ class Converter:
                 f.write(f"Author: {self.author}\n\n")
                 f.write("==============================\n\n")
             f.write(".. toctree::\n")
-            f.write("   :maxdepth: 2\n")
+            f.write("   :maxdepth: 1\n")
             f.write("   :caption: Contents:\n")
             f.write("   :name: maintoc\n\n")
             for chapter in self.toctree:
                 f.write(f"   {chapter}\n")
             f.write("\nIndices\n")
             f.write("==============================\n\n")
-            f.write("* :ref:`genindex`\n")
             f.write("* :ref:`search`")
 
     def extract_images(self):
