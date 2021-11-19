@@ -15,3 +15,6 @@ Sphinx has to be installed for this to work.
 cli_option_css_help = """\b
 Include the custom CSS from the EPUB for the HTML output
 """
+cli_option_overwrite_help = """\b
+Overwrite the output directory if present already
+"""

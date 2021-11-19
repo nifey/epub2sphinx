@@ -32,7 +32,7 @@ Built during [FOSSHack 21](https://fossunited.org/fosshack/2021) to solve [this 
 
 ## Usage
 ```
-Usage: epub2sphinx [-o <output_directory_path>] [-t <sphinx_theme_name>] [-s|--server|-b|--build] [-c] <epub_file_name>
+Usage: epub2sphinx <epub_file_name> [-o <output_directory_path>] [-t <sphinx_theme_name>] [-s|--server|-b|--build] [-c]
 
   This tool helps you to convert your epub files into sphinx format for a better reading experience.
   Kindly provide the epub file as the argument to this command.
@@ -47,6 +47,7 @@ Options:
   -s, --serve                  Build HTML using Sphinx and Serve the files on localhost.
                                Sphinx has to be installed for this to work.
   -c, --include-custom-css     Include the custom CSS from the EPUB for the HTML output
+  --overwrite                  Overwrite the output directory if present already
   --version                    Show the version and exit.
   --help                       Show this message and exit.
 ```
