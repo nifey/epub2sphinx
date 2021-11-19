@@ -26,7 +26,7 @@ class Converter:
 
         self.epub = epub.read_epub(file_name)
         self.title = escape_quotes(self.epub.title)
-
+        self.chapter_names = {}
         self.toctree = []
         try:
           self.author = escape_quotes(self.epub.get_metadata('DC', 'creator')[0][0])
@@ -50,6 +50,7 @@ class Converter:
                         os.path.join(self.output_directory, 'Makefile'))
         shutil.copyfile(os.path.join(templates_directory,'make.bat'),
                         os.path.join(self.output_directory, 'make.bat'))
+        self.get_chapter_names()
         # Generate ReST file for each chapter in ebook
         click.echo("Generating ReST files")
         self.generate_rst()
@@ -95,14 +96,32 @@ class Converter:
         with open(os.path.join(self.source_directory,'conf.py'), 'x') as out_conf:
             out_conf.write(conf_contents)
 
+    def get_chapter_names(self):
+        href_pattern = re.compile(r"([\w/.@-]*html)#?[^\'\"]*")
+        def get_names(item):
+            if isinstance(item, ebooklib.epub.Link):
+                link = item
+            elif isinstance(item, tuple) and isinstance(item[0], ebooklib.epub.Section):
+                link = item[0]
+                for sub_item in item[1]:
+                    get_names(sub_item)
+            # Removing #id from file.html#id
+            file_name = re.sub(href_pattern, r"\1", link.href)
+            self.chapter_names[file_name] = link.title
+        for item in self.epub.toc:
+            get_names(item)
+
     def generate_rst(self):
         # Generate ReST file for each chapter in ebook
-        rubric_pattern = re.compile(r"\brubric::[ ]+(.+)\n")
         href_pattern = re.compile(r"(href=[\"\'][\w/.@-]*html)([#\'\"])")
         svg_pattern = re.compile(r"\<svg[^\>]*\>(.*)\</svg\>", re.MULTILINE|re.DOTALL)
         for chapter in self.epub.spine:
             chapter_item = self.epub.get_item_with_id(chapter[0])
             file_name = chapter_item.get_name()
+            if file_name in self.chapter_names.keys():
+                chapter_title = self.chapter_names[file_name]
+            else:
+                chapter_title = "Front page"
 
             # Add filename to toctree
             self.toctree.append(file_name)
@@ -120,16 +139,6 @@ class Converter:
                 html_content = re.sub(svg_pattern, r"\1", html_content)
                 html_content = html_content.replace("<image", "<img").replace("xlink:href", "src")
             rst_content = pypandoc.convert_text(html_content, 'rst', format='html')
-
-            matches = re.findall(rubric_pattern, rst_content)
-            if isinstance(chapter_item, epub.EpubNav):
-                self.toctree.remove(file_name)
-                continue
-            elif len(matches) != 0:
-                chapter_title = matches[0]
-            else:
-                # TODO Check the headings in the file for chapter title
-                chapter_title = "Front page"
 
             with open(os.path.join(self.source_directory, file_name + '.rst'), 'x') as ch_file:
                 # Add Chapter title
