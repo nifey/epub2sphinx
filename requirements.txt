@@ -1,6 +1,5 @@
 click==8.0.3
 EbookLib==0.17.1
-epub2sphinx==0.0.1
 lxml==4.6.4
 pypandoc==1.6.4
 six==1.16.0
