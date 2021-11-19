@@ -6,6 +6,8 @@ It uses [Pandoc](https://pandoc.org/) for converting HTML data inside epub files
 
 It creates a directory structure similar to what `sphinx-quickstart` generates by default.
 
+Built during [FOSSHack 21](https://fossunited.org/fosshack/2021) to solve [this issue](https://github.com/kaniyamfoundation/projectideas/issues/70).
+
 ## Installation
 - Install pandoc
   ```bash
@@ -72,6 +74,11 @@ Using Sphinx allows us to make use of any [default](https://www.sphinx-doc.org/e
 
 ![image](https://user-images.githubusercontent.com/24192122/141684776-4a1e5012-7d11-4f82-a25b-2cfe8374ae87.png)
 
+## Contributing
+
+Contributions are welcome.
+Fork the repo and Create a PR with your changes.
+If you are working on any of the existing issues, please add a comment on the issue to avoid duplicated effort.
 
 ![GitHub](https://img.shields.io/github/license/nifey/epub2sphinx)
 ![GitHub issues](https://img.shields.io/github/issues/nifey/epub2sphinx)
