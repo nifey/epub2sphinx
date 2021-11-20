@@ -43,7 +43,7 @@ class Converter:
 
     def convert(self):
         # Create output directory structure
-        click.echo("\nCreating directory structure")
+        click.echo("Creating directory structure")
         self.create_directory_structure(["source","build","source/_static"])
         # Generate conf.py
         click.echo("Generating conf.py")

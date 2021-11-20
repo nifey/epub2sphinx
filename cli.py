@@ -21,7 +21,10 @@ def convert(output_directory,sphinx_theme_name,input_file,post_conversion,includ
         Kindly provide the epub file as the argument to this command.
     '''
     if not output_directory:
-        output_directory = os.path.join(os.getcwd(),(input_file.name.split(os.path.sep)[-1]).rstrip(".epub"))
+        output_name = input_file.name.split(os.path.sep)[-1]
+        if output_name.endswith(".epub"):
+            output_name = output_name[:-5]
+        output_directory = os.path.join(os.getcwd(),output_name)
         click.echo("Writing output to {}".format(output_directory))
     if os.path.isdir(output_directory):
         if overwrite or click.confirm("{} already exists, Do you want to overwrite it?".format(output_directory)):
