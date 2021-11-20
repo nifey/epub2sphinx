@@ -14,6 +14,10 @@ def escape_quotes(text):
     if text is not None:
         return text.replace("'","\\'").replace('"','\\"')
 
+def get_chapter_name(chapter):
+    if chapter is not None:
+        return chapter[0]
+
 class Converter:
 
     def __init__(self, file_name, output_directory, sphinx_theme_name,include_custom_css):
@@ -52,7 +56,6 @@ class Converter:
                         os.path.join(self.output_directory, 'make.bat'))
         self.get_chapter_names()
         # Generate ReST file for each chapter in ebook
-        click.echo("Generating ReST files")
         self.generate_rst()
         # Generate index.rst
         click.echo("Generating index.rst")
@@ -108,39 +111,40 @@ class Converter:
         # Generate ReST file for each chapter in ebook
         href_pattern = re.compile(r"(href=[\"\'][\w/.@-]*html)([#\'\"])")
         svg_pattern = re.compile(r"\<svg[^\>]*\>(.*)\</svg\>", re.MULTILINE|re.DOTALL)
-        for chapter in self.epub.spine:
-            chapter_item = self.epub.get_item_with_id(chapter[0])
-            file_name = chapter_item.get_name()
-            if file_name in self.chapter_names.keys():
-                chapter_title = self.chapter_names[file_name]
-            else:
-                chapter_title = "Front page"
+        with click.progressbar(self.epub.spine,show_eta=True,label="Generating ReST files",item_show_func=get_chapter_name) as bar:
+            for chapter in bar:
+                chapter_item = self.epub.get_item_with_id(chapter[0])
+                file_name = chapter_item.get_name()
+                if file_name in self.chapter_names.keys():
+                    chapter_title = self.chapter_names[file_name]
+                else:
+                    chapter_title = "Front page"
 
-            # Add filename to toctree
-            self.toctree.append(file_name)
+                # Add filename to toctree
+                self.toctree.append(file_name)
 
-            # Create any parent directories as given in the filename
-            os.makedirs(os.path.dirname(os.path.join(self.source_directory, file_name)), exist_ok=True)
+                # Create any parent directories as given in the filename
+                os.makedirs(os.path.dirname(os.path.join(self.source_directory, file_name)), exist_ok=True)
 
-            # Convert HTML to ReST
-            html_content = chapter_item.get_content().decode()
-            html_content = re.sub(href_pattern, r"\1.html\2", html_content)
-            if html_content.find("epub:type") != -1:
-                self.toctree.remove(file_name)
-                continue
-            if html_content.find("<svg") != -1:
-                html_content = re.sub(svg_pattern, r"\1", html_content)
-                html_content = html_content.replace("<image", "<img").replace("xlink:href", "src")
-            rst_content = pypandoc.convert_text(html_content, 'rst', format='html')
+                # Convert HTML to ReST
+                html_content = chapter_item.get_content().decode()
+                html_content = re.sub(href_pattern, r"\1.html\2", html_content)
+                if html_content.find("epub:type") != -1:
+                    self.toctree.remove(file_name)
+                    continue
+                if html_content.find("<svg") != -1:
+                    html_content = re.sub(svg_pattern, r"\1", html_content)
+                    html_content = html_content.replace("<image", "<img").replace("xlink:href", "src")
+                rst_content = pypandoc.convert_text(html_content, 'rst', format='html')
 
-            with open(os.path.join(self.source_directory, file_name + '.rst'), 'x') as ch_file:
-                # Add Chapter title
-                ch_file.write('*'*len(chapter_title)+'\n')
-                ch_file.write(chapter_title+'\n')
-                ch_file.write('*'*len(chapter_title)+'\n')
+                with open(os.path.join(self.source_directory, file_name + '.rst'), 'x') as ch_file:
+                    # Add Chapter title
+                    ch_file.write('*'*len(chapter_title)+'\n')
+                    ch_file.write(chapter_title+'\n')
+                    ch_file.write('*'*len(chapter_title)+'\n')
 
-                # Write ReST content
-                ch_file.write(rst_content)
+                    # Write ReST content
+                    ch_file.write(rst_content)
 
     def generate_index(self):
         # Generate index.rst
