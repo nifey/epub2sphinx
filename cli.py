@@ -4,6 +4,7 @@ import subprocess
 from epub2sphinx import constants
 import os
 import shutil
+import time
 
 @click.command()
 @click.option('-o','--output-directory',type=click.Path(),help=constants.cli_option_output_directory_help)
@@ -33,8 +34,10 @@ def convert(output_directory,sphinx_theme_name,input_file,post_conversion,includ
             click.echo("Aborting")
             exit(1)
 
+    start_time = time.time()
     c = epub2sphinx.Converter(input_file.name,output_directory,sphinx_theme_name.lower(),include_custom_css)
     c.convert()
+    click.echo("Conversion finished in {:.2f}s".format(time.time() - start_time))
 
     if post_conversion:
         # Build using Sphinx
