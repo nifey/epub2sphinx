@@ -1,18 +1,12 @@
-import datetime
-import ebooklib
 import pypandoc
 import os
 import re
 import shutil
 import click
 
-from ebooklib import epub
+from .book import Book
 
 templates_directory = os.path.join(os.path.abspath(os.path.dirname(__file__)), "templates")
-
-def escape_quotes(text):
-    if text is not None:
-        return text.replace("'","\\'").replace('"','\\"')
 
 def get_chapter_name(chapter):
     if chapter is not None:
@@ -21,25 +15,12 @@ def get_chapter_name(chapter):
 class Converter:
 
     def __init__(self, file_name, output_directory, sphinx_theme_name,include_custom_css):
-        self.file = file_name
+        self.book = Book(file_name)
         self.output_directory = output_directory
         self.source_directory = os.path.join(output_directory, 'source')
         self.static_files_directory = os.path.join(self.source_directory, '_static')
         self.theme = sphinx_theme_name
         self.include_custom_css = include_custom_css
-
-        self.epub = epub.read_epub(file_name)
-        self.title = escape_quotes(self.epub.title)
-        self.chapter_names = {}
-        self.toctree = []
-        try:
-          self.author = escape_quotes(self.epub.get_metadata('DC', 'creator')[0][0])
-        except:
-          self.author = None
-        try:
-          self.rights = escape_quotes(self.epub.get_metadata('DC', 'rights')[0][0])
-        except:
-          self.rights = None
 
     def convert(self):
         # Create output directory structure
@@ -54,7 +35,6 @@ class Converter:
                         os.path.join(self.output_directory, 'Makefile'))
         shutil.copyfile(os.path.join(templates_directory,'make.bat'),
                         os.path.join(self.output_directory, 'make.bat'))
-        self.get_chapter_names()
         # Generate ReST file for each chapter in ebook
         self.generate_rst()
         # Generate index.rst
@@ -76,52 +56,35 @@ class Converter:
             conf_contents = in_conf.read()
 
         # Add Author, Theme, Copyright, Title
-        conf_contents = conf_contents.replace("<<<TITLE>>>", self.title)
+        conf_contents = conf_contents.replace("<<<TITLE>>>", self.book.title)
         conf_contents = conf_contents.replace("<<<THEME>>>", self.theme)
-        if self.author:
-            conf_contents = conf_contents.replace("<<<AUTHOR>>>", self.author)
+        if self.book.author:
+            conf_contents = conf_contents.replace("<<<AUTHOR>>>", self.book.author)
         else:
             conf_contents = conf_contents.replace("author = '<<<AUTHOR>>>'", "")
-        if self.rights:
-            conf_contents = conf_contents.replace("<<<COPYRIGHT>>>", self.rights)
-        elif self.author:
-            conf_contents = conf_contents.replace("<<<COPYRIGHT>>>", datetime.datetime.now().strftime("%Y") + " " + self.author)
+        if self.book.rights:
+            conf_contents = conf_contents.replace("<<<COPYRIGHT>>>", self.book.rights)
         else:
             conf_contents = conf_contents.replace("copyright = '<<<COPYRIGHT>>>'", "")
 
         with open(os.path.join(self.source_directory,'conf.py'), 'x') as out_conf:
             out_conf.write(conf_contents)
 
-    def get_chapter_names(self):
-        href_pattern = re.compile(r"([\w/.@-]*html)#?[^\'\"]*")
-        def get_names(item):
-            if isinstance(item, ebooklib.epub.Link):
-                link = item
-            elif isinstance(item, tuple) and isinstance(item[0], ebooklib.epub.Section):
-                link = item[0]
-                for sub_item in item[1]:
-                    get_names(sub_item)
-            # Removing #id from file.html#id
-            file_name = re.sub(href_pattern, r"\1", link.href)
-            self.chapter_names[file_name] = link.title
-        for item in self.epub.toc:
-            get_names(item)
-
     def generate_rst(self):
         # Generate ReST file for each chapter in ebook
         href_pattern = re.compile(r"(href=[\"\'][\w/.@-]*html)([#\'\"])")
         svg_pattern = re.compile(r"\<svg[^\>]*\>(.*)\</svg\>", re.MULTILINE|re.DOTALL)
-        with click.progressbar(self.epub.spine,show_eta=True,label="Generating ReST files",item_show_func=get_chapter_name) as bar:
+        with click.progressbar(self.book.epub.spine,show_eta=True,label="Generating ReST files",item_show_func=get_chapter_name) as bar:
             for chapter in bar:
-                chapter_item = self.epub.get_item_with_id(chapter[0])
+                chapter_item = self.book.epub.get_item_with_id(chapter[0])
                 file_name = chapter_item.get_name()
-                if file_name in self.chapter_names.keys():
-                    chapter_title = self.chapter_names[file_name]
+                if file_name in self.book.chapter_names.keys():
+                    chapter_title = self.book.chapter_names[file_name]
                 else:
                     chapter_title = "Front page"
 
                 # Add filename to toctree
-                self.toctree.append(file_name)
+                self.book.toctree.append(file_name)
 
                 # Create any parent directories as given in the filename
                 os.makedirs(os.path.dirname(os.path.join(self.source_directory, file_name)), exist_ok=True)
@@ -130,7 +93,7 @@ class Converter:
                 html_content = chapter_item.get_content().decode()
                 html_content = re.sub(href_pattern, r"\1.html\2", html_content)
                 if html_content.find("epub:type") != -1:
-                    self.toctree.remove(file_name)
+                    self.book.toctree.remove(file_name)
                     continue
                 if html_content.find("<svg") != -1:
                     html_content = re.sub(svg_pattern, r"\1", html_content)
@@ -149,16 +112,16 @@ class Converter:
     def generate_index(self):
         # Generate index.rst
         with open(os.path.join(self.source_directory,"index.rst"), 'w') as f:
-            f.write(f"{self.title}\n")
-            f.write(f"{'='*len(self.title)}\n\n")
-            if self.author:
-                f.write(f"Author: {self.author}\n\n")
+            f.write(f"{self.book.title}\n")
+            f.write(f"{'='*len(self.book.title)}\n\n")
+            if self.book.author:
+                f.write(f"Author: {self.book.author}\n\n")
                 f.write("==============================\n\n")
             f.write(".. toctree::\n")
             f.write("   :maxdepth: 1\n")
             f.write("   :caption: Contents:\n")
             f.write("   :name: maintoc\n\n")
-            for chapter in self.toctree:
+            for chapter in self.book.toctree:
                 f.write(f"   {chapter}\n")
             f.write("\nIndices\n")
             f.write("==============================\n\n")
@@ -166,7 +129,7 @@ class Converter:
 
     def extract_images(self):
         # save all media, xml, font files for the current book to its source directory
-        files = self.epub.get_items()
+        files = self.book.epub.get_items()
         html_css_files = []
 
         for book_file in files:
