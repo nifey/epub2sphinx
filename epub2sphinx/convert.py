@@ -27,13 +27,9 @@ class Converter:
     def convert(self):
         # Create output directory structure
         click.echo("Creating directory structure")
-        self.create_directory_structure(["source","build","source/_static"])
-        # Copy Makefiles into output_directory
-        click.echo("Copying Makefiles")
-        shutil.copyfile(os.path.join(templates_directory,'Makefile'),
-                        os.path.join(self.output_directory, 'Makefile'))
-        shutil.copyfile(os.path.join(templates_directory,'make.bat'),
-                        os.path.join(self.output_directory, 'make.bat'))
+        shutil.copytree(os.path.join(templates_directory,"makefiles"),
+                        self.output_directory)
+        os.makedirs(self.static_files_directory)
         # Generate ReST file for each chapter in ebook
         self.generate_rst()
         # Extract images from epub
@@ -48,11 +44,6 @@ class Converter:
             cf.write(jinja_env.get_template('conf.py').render(book=self.book, theme=self.theme))
         with open(os.path.join(self.source_directory,'index.rst'), 'x') as of:
             of.write(jinja_env.get_template('index.rst').render(book=self.book))
-
-    def create_directory_structure(self, working_directories_to_be_created):
-        for directory_name in working_directories_to_be_created:
-            path = os.path.join(self.output_directory,directory_name)
-            os.makedirs(path)
 
     def generate_rst(self):
         # Generate ReST file for each chapter in ebook
