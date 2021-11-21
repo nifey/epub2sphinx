@@ -17,10 +17,13 @@
 
 # -- Project information -----------------------------------------------------
 
-project = '<<<TITLE>>>'
-copyright = '<<<COPYRIGHT>>>'
-author = '<<<AUTHOR>>>'
-
+project = '{{ book.title }}'
+{% if book.author %}
+author = '{{ book.author }}'
+{% endif %}
+{% if book.rights %}
+copyright = '{{ book.rights }}'
+{% endif %}
 
 # -- General configuration ---------------------------------------------------
 
@@ -46,7 +49,7 @@ root_doc = 'index'
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = '<<<THEME>>>'
+html_theme = '{{ theme }}'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

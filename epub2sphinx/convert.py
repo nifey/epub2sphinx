@@ -1,3 +1,4 @@
+import jinja2
 import pypandoc
 import os
 import re
@@ -5,6 +6,7 @@ import shutil
 import click
 
 from .book import Book
+from jinja2 import Environment, PackageLoader
 
 templates_directory = os.path.join(os.path.abspath(os.path.dirname(__file__)), "templates")
 
@@ -26,9 +28,6 @@ class Converter:
         # Create output directory structure
         click.echo("Creating directory structure")
         self.create_directory_structure(["source","build","source/_static"])
-        # Generate conf.py
-        click.echo("Generating conf.py")
-        self.generate_conf()
         # Copy Makefiles into output_directory
         click.echo("Copying Makefiles")
         shutil.copyfile(os.path.join(templates_directory,'Makefile'),
@@ -37,38 +36,23 @@ class Converter:
                         os.path.join(self.output_directory, 'make.bat'))
         # Generate ReST file for each chapter in ebook
         self.generate_rst()
-        # Generate index.rst
-        click.echo("Generating index.rst")
-        self.generate_index()
         # Extract images from epub
         click.echo("Extracting images")
         self.extract_images()
+        # Render jinja templates
+        click.echo("Generating conf.py and index.rst")
+        jinja_env = Environment(
+            loader=PackageLoader("epub2sphinx")
+        )
+        with open(os.path.join(self.source_directory,'conf.py'), 'x') as cf:
+            cf.write(jinja_env.get_template('conf.py').render(book=self.book, theme=self.theme))
+        with open(os.path.join(self.source_directory,'index.rst'), 'x') as of:
+            of.write(jinja_env.get_template('index.rst').render(book=self.book))
 
     def create_directory_structure(self, working_directories_to_be_created):
         for directory_name in working_directories_to_be_created:
             path = os.path.join(self.output_directory,directory_name)
             os.makedirs(path)
-
-
-    def generate_conf(self):
-        # Generate conf.py for sphinx by extracting title, author name, etc
-        with open(os.path.join(templates_directory, 'conf.py'), 'r') as in_conf:
-            conf_contents = in_conf.read()
-
-        # Add Author, Theme, Copyright, Title
-        conf_contents = conf_contents.replace("<<<TITLE>>>", self.book.title)
-        conf_contents = conf_contents.replace("<<<THEME>>>", self.theme)
-        if self.book.author:
-            conf_contents = conf_contents.replace("<<<AUTHOR>>>", self.book.author)
-        else:
-            conf_contents = conf_contents.replace("author = '<<<AUTHOR>>>'", "")
-        if self.book.rights:
-            conf_contents = conf_contents.replace("<<<COPYRIGHT>>>", self.book.rights)
-        else:
-            conf_contents = conf_contents.replace("copyright = '<<<COPYRIGHT>>>'", "")
-
-        with open(os.path.join(self.source_directory,'conf.py'), 'x') as out_conf:
-            out_conf.write(conf_contents)
 
     def generate_rst(self):
         # Generate ReST file for each chapter in ebook
@@ -108,24 +92,6 @@ class Converter:
 
                     # Write ReST content
                     ch_file.write(rst_content)
-
-    def generate_index(self):
-        # Generate index.rst
-        with open(os.path.join(self.source_directory,"index.rst"), 'w') as f:
-            f.write(f"{self.book.title}\n")
-            f.write(f"{'='*len(self.book.title)}\n\n")
-            if self.book.author:
-                f.write(f"Author: {self.book.author}\n\n")
-                f.write("==============================\n\n")
-            f.write(".. toctree::\n")
-            f.write("   :maxdepth: 1\n")
-            f.write("   :caption: Contents:\n")
-            f.write("   :name: maintoc\n\n")
-            for chapter in self.book.toctree:
-                f.write(f"   {chapter}\n")
-            f.write("\nIndices\n")
-            f.write("==============================\n\n")
-            f.write("* :ref:`search`")
 
     def extract_images(self):
         # save all media, xml, font files for the current book to its source directory

@@ -3,3 +3,4 @@ EbookLib==0.17.1
 lxml==4.6.4
 pypandoc==1.6.4
 six==1.16.0
+Jinja2==3.0.3
