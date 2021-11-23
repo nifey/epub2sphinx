@@ -48,7 +48,8 @@ def convert(output_directory,sphinx_theme_name,input_file,post_conversion,includ
             if post_conversion == 'serve':
                 # Serve on localhost
                 os.chdir(html_path)
-                subprocess.call(["python -m http.server --bind 127.0.0.1"], shell=True)
+                # 0 will automatically make use of the next available port
+                subprocess.call(["python -m http.server 0 --bind 127.0.0.1"], shell=True)
             else:
                 click.echo("Build finished successfully")
         else:
