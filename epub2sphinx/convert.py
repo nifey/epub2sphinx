@@ -5,6 +5,7 @@ import click
 
 from .book import Book
 from .chapter import Chapter
+from concurrent.futures import ThreadPoolExecutor
 from jinja2 import Environment, PackageLoader
 
 templates_directory = os.path.join(os.path.abspath(os.path.dirname(__file__)), "templates")
@@ -46,23 +47,20 @@ class Converter:
 
     def generate_rst(self):
         # Generate ReST file for each chapter in ebook
-        with click.progressbar(self.book.epub.spine,show_eta=True,label="Generating ReST files",item_show_func=get_chapter_name) as bar:
-            for chapter_id in bar:
-                chapter = Chapter(self.book, chapter_id[0])
+        click.echo("Generating ReST files")
+        def generate_chapter(chapter_id):
+            chapter = Chapter(self.book, chapter_id[0])
+            # Create any parent directories as given in the filename
+            os.makedirs(os.path.dirname(os.path.join(self.source_directory, chapter.file)), exist_ok=True)
+            # Convert HTML to ReST
+            if not chapter.convert():
+                # Omit chapter from toctree
+                return None
+            chapter.write(self.source_directory)
+            return chapter.file
 
-                # Add filename to toctree
-                self.book.toctree.append(chapter.file)
-
-                # Create any parent directories as given in the filename
-                os.makedirs(os.path.dirname(os.path.join(self.source_directory, chapter.file)), exist_ok=True)
-
-                # Convert HTML to ReST
-                if not chapter.convert():
-                    # Omit chapter from toctree
-                    self.book.toctree.remove(chapter.file)
-                    continue
-
-                chapter.write(self.source_directory)
+        with ThreadPoolExecutor() as executor:
+            self.book.toctree = list(filter(None, executor.map(generate_chapter, self.book.epub.spine)))
 
     def extract_images(self):
         # save all media, xml, font files for the current book to its source directory
