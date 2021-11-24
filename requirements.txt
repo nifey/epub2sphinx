@@ -4,3 +4,4 @@ lxml==4.6.4
 pypandoc==1.6.4
 six==1.16.0
 Jinja2==3.0.3
+tqdm==4.62.3

@@ -7,12 +7,9 @@ from .book import Book
 from .chapter import Chapter
 from concurrent.futures import ThreadPoolExecutor
 from jinja2 import Environment, PackageLoader
+from tqdm import tqdm
 
 templates_directory = os.path.join(os.path.abspath(os.path.dirname(__file__)), "templates")
-
-def get_chapter_name(chapter):
-    if chapter is not None:
-        return chapter[0]
 
 class Converter:
 
@@ -47,7 +44,6 @@ class Converter:
 
     def generate_rst(self):
         # Generate ReST file for each chapter in ebook
-        click.echo("Generating ReST files")
         def generate_chapter(chapter_id):
             chapter = Chapter(self.book, chapter_id[0])
             # Create any parent directories as given in the filename
@@ -60,7 +56,7 @@ class Converter:
             return chapter.file
 
         with ThreadPoolExecutor() as executor:
-            self.book.toctree = list(filter(None, executor.map(generate_chapter, self.book.epub.spine)))
+            self.book.toctree = list(filter(None, tqdm(executor.map(generate_chapter, self.book.epub.spine), total=len(self.book.epub.spine), desc="Generating ReST files", colour='Blue')))
 
     def extract_images(self):
         # save all media, xml, font files for the current book to its source directory
