@@ -1,11 +1,10 @@
 import jinja2
-import pypandoc
 import os
-import re
 import shutil
 import click
 
 from .book import Book
+from .chapter import Chapter
 from jinja2 import Environment, PackageLoader
 
 templates_directory = os.path.join(os.path.abspath(os.path.dirname(__file__)), "templates")
@@ -47,42 +46,23 @@ class Converter:
 
     def generate_rst(self):
         # Generate ReST file for each chapter in ebook
-        href_pattern = re.compile(r"(href=[\"\'][\w/.@-]*html)([#\'\"])")
-        svg_pattern = re.compile(r"\<svg[^\>]*\>(.*)\</svg\>", re.MULTILINE|re.DOTALL)
         with click.progressbar(self.book.epub.spine,show_eta=True,label="Generating ReST files",item_show_func=get_chapter_name) as bar:
-            for chapter in bar:
-                chapter_item = self.book.epub.get_item_with_id(chapter[0])
-                file_name = chapter_item.get_name()
-                if file_name in self.book.chapter_names.keys():
-                    chapter_title = self.book.chapter_names[file_name]
-                else:
-                    chapter_title = "Front page"
+            for chapter_id in bar:
+                chapter = Chapter(self.book, chapter_id[0])
 
                 # Add filename to toctree
-                self.book.toctree.append(file_name)
+                self.book.toctree.append(chapter.file)
 
                 # Create any parent directories as given in the filename
-                os.makedirs(os.path.dirname(os.path.join(self.source_directory, file_name)), exist_ok=True)
+                os.makedirs(os.path.dirname(os.path.join(self.source_directory, chapter.file)), exist_ok=True)
 
                 # Convert HTML to ReST
-                html_content = chapter_item.get_content().decode()
-                html_content = re.sub(href_pattern, r"\1.html\2", html_content)
-                if html_content.find("epub:type") != -1:
-                    self.book.toctree.remove(file_name)
+                if not chapter.convert():
+                    # Omit chapter from toctree
+                    self.book.toctree.remove(chapter.file)
                     continue
-                if html_content.find("<svg") != -1:
-                    html_content = re.sub(svg_pattern, r"\1", html_content)
-                    html_content = html_content.replace("<image", "<img").replace("xlink:href", "src")
-                rst_content = pypandoc.convert_text(html_content, 'rst', format='html')
 
-                with open(os.path.join(self.source_directory, file_name + '.rst'), 'x') as ch_file:
-                    # Add Chapter title
-                    ch_file.write('*'*len(chapter_title)+'\n')
-                    ch_file.write(chapter_title+'\n')
-                    ch_file.write('*'*len(chapter_title)+'\n')
-
-                    # Write ReST content
-                    ch_file.write(rst_content)
+                chapter.write(self.source_directory)
 
     def extract_images(self):
         # save all media, xml, font files for the current book to its source directory
