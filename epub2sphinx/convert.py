@@ -35,7 +35,8 @@ def extract_file(item, source_directory, extract_style):
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, 'wb') as ext_file:
             ext_file.write(item.content)
-        return item.file_name
+        if item_type == ebooklib.ITEM_STYLE:
+            return item.file_name
 
 def generate_chapter(chapter_id, book, source_directory):
     """Generate ReST for each chapter and write to output file
@@ -90,7 +91,6 @@ class Converter:
             self.css_files = list(filter(None, executor.map(
                 lambda x: extract_file(x, self.source_directory, self.include_custom_css),
                 self.book.epub.get_items())))
-            print(self.css_files)
 
         # Render jinja templates
         click.echo("Generating conf.py and index.rst")
