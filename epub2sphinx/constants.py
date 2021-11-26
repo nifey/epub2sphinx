@@ -18,3 +18,6 @@ Include the custom CSS and Fonts from the EPUB for the HTML output
 cli_option_overwrite_help = """\b
 Overwrite the output directory if present already
 """
+cli_option_port_help = """\b
+The port number on which the files will be served after conversion
+"""
