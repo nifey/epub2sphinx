@@ -12,7 +12,52 @@ from tqdm import tqdm
 
 templates_directory = os.path.join(os.path.abspath(os.path.dirname(__file__)), "templates")
 
-def extract_file(item, source_directory, extract_style):
+def should_extract_item(item, extract_style):
+    """Returns a boolean indicating if this item needs to be extracted
+
+    :param item: EpubItem
+    :type item: class:`ebook.epub.EpubItem`
+
+    :param extract_style: Decides if CSS and Font items should be extracted
+    :type extract_style: bool
+
+    :returns: If the item should be extracted
+    :rtype: bool
+    """
+    item_type = item.get_type()
+    if (item_type == ebooklib.ITEM_DOCUMENT or
+        item_type == ebooklib.ITEM_IMAGE or
+        item_type == ebooklib.ITEM_COVER):
+        return True
+    elif (extract_style and
+          (item_type == ebooklib.ITEM_STYLE or
+           item_type == ebooklib.ITEM_FONT)):
+        return True
+    else:
+        return False
+
+def get_filename(item, source_directory):
+    """Returns the output file name of the item
+
+    :param item: EpubItem
+    :type item: class:`ebook.epub.EpubItem`
+
+    :param source_directory: Source directory
+    :type source_directory: str
+
+    :returns: Output filename
+    :rtype: str
+    """
+    item_type = item.get_type()
+    if (item_type == ebooklib.ITEM_DOCUMENT or
+        item_type == ebooklib.ITEM_IMAGE or
+        item_type == ebooklib.ITEM_COVER):
+        return os.path.join(source_directory, item.file_name)
+    elif (item_type == ebooklib.ITEM_STYLE or
+          item_type == ebooklib.ITEM_FONT):
+        return os.path.join(source_directory, "_static", item.file_name)
+
+def extract_item(item, source_directory, extract_style):
     """Extracts the Image, CSS or Font file
 
     :param item: EpubItem to extract
@@ -24,19 +69,10 @@ def extract_file(item, source_directory, extract_style):
     :param extract_style: Decides if CSS and Font items should be extracted
     :type extract_style: bool
     """
-    item_type = item.get_type()
-    if (item_type == ebooklib.ITEM_IMAGE or item_type == ebooklib.ITEM_COVER):
-        file_path = os.path.join(source_directory, item.file_name)
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+    if should_extract_item(item, extract_style):
+        file_path = get_filename(item, source_directory)
         with open(file_path, 'wb') as ext_file:
             ext_file.write(item.content)
-    elif (extract_style and (item_type == ebooklib.ITEM_STYLE or item_type == ebooklib.ITEM_FONT)):
-        file_path = os.path.join(source_directory, "_static", item.file_name)
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
-        with open(file_path, 'wb') as ext_file:
-            ext_file.write(item.content)
-        if item_type == ebooklib.ITEM_STYLE:
-            return item.file_name
 
 def generate_chapter(chapter_id, book, source_directory):
     """Generate ReST for each chapter and write to output file
@@ -51,8 +87,6 @@ def generate_chapter(chapter_id, book, source_directory):
     :type source_directory: str
     """
     chapter = Chapter(book, chapter_id[0])
-    # Create any parent directories as given in the filename
-    os.makedirs(os.path.dirname(os.path.join(source_directory, chapter.file)), exist_ok=True)
     # Convert HTML to ReST
     if not chapter.convert():
         # Omit chapter from toctree
@@ -66,7 +100,6 @@ class Converter:
         self.book = Book(file_name)
         self.output_directory = output_directory
         self.source_directory = os.path.join(output_directory, 'source')
-        self.static_files_directory = os.path.join(self.source_directory, '_static')
         self.theme = sphinx_theme_name
         self.include_custom_css = include_custom_css
         self.css_files = None
@@ -76,7 +109,13 @@ class Converter:
         click.echo("Creating directory structure")
         shutil.copytree(os.path.join(templates_directory,"makefiles"),
                         self.output_directory)
-        os.makedirs(self.static_files_directory)
+        directories = {os.path.dirname(get_filename(item, self.source_directory))
+                       for item in self.book.epub.get_items()
+                       if should_extract_item(item, self.include_custom_css)}
+        for directory in directories:
+            os.makedirs(directory, exist_ok=True)
+        self.css_files = [item.file_name for item in self.book.epub.get_items()
+                          if item.get_type() == ebooklib.ITEM_STYLE]
 
         with ThreadPoolExecutor() as executor:
             # Generate ReST file for each chapter in ebook
@@ -88,9 +127,9 @@ class Converter:
                 colour='Blue')))
             # Extract other files from epub
             click.echo("Extracting images")
-            self.css_files = list(filter(None, executor.map(
-                lambda x: extract_file(x, self.source_directory, self.include_custom_css),
-                self.book.epub.get_items())))
+            list(executor.map(
+                lambda x: extract_item(x, self.source_directory, self.include_custom_css),
+                self.book.epub.get_items()))
 
         # Render jinja templates
         click.echo("Generating conf.py and index.rst")
