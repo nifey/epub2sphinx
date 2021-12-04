@@ -25,8 +25,7 @@ def should_extract_item(item, extract_style):
     :rtype: bool
     """
     item_type = item.get_type()
-    if (item_type == ebooklib.ITEM_DOCUMENT or
-        item_type == ebooklib.ITEM_IMAGE or
+    if (item_type == ebooklib.ITEM_IMAGE or
         item_type == ebooklib.ITEM_COVER):
         return True
     elif (extract_style and
@@ -111,7 +110,8 @@ class Converter:
                         self.output_directory)
         directories = {os.path.dirname(get_filename(item, self.source_directory))
                        for item in self.book.epub.get_items()
-                       if should_extract_item(item, self.include_custom_css)}
+                       if (should_extract_item(item, self.include_custom_css) or
+                          item.get_type() == ebooklib.ITEM_DOCUMENT)}
         for directory in directories:
             os.makedirs(directory, exist_ok=True)
         self.css_files = [item.file_name for item in self.book.epub.get_items()
