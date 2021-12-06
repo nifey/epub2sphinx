@@ -46,7 +46,8 @@ Options:
                                Sphinx has to be installed for this to work.
   -s, --serve                  Build HTML using Sphinx and Serve the files on localhost.
                                Sphinx has to be installed for this to work.
-  -c, --include-custom-css     Include the custom CSS from the EPUB for the HTML output
+  -c, --include-custom-css     Include the custom CSS and Fonts from the EPUB for the HTML output
+  -p, --port INTEGER           The port number on which the files will be served after conversion
   --overwrite                  Overwrite the output directory if present already
   --version                    Show the version and exit.
   --help                       Show this message and exit.
