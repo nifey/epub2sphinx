@@ -21,16 +21,16 @@ class Chapter:
     :param content: XHTML or ReST content of the chapter
     :type content: str
     """
-    def __init__(self, book, chapter_id):
+    def __init__(self, book, chapter_item):
         """Chapter Constructor
 
         :param epub: Book instance that contains the chapter
         :type epub: class:`epub2sphinx.Book`
 
-        :param chapter_id: ID of the chapter
-        :type chapter_id: str
+        :param chapter_item: EpubItem of the chapter
+        :type chapter_item: class:`ebooklib.epub.EpubItem`
         """
-        self.chapter_item = book.epub.get_item_with_id(chapter_id)
+        self.chapter_item = chapter_item
         self.file = self.chapter_item.get_name()
         self.content = self.chapter_item.get_content().decode()
         if self.file in book.chapter_names.keys():
@@ -64,3 +64,12 @@ class Chapter:
 
             # Write ReST content
             ch_file.write(self.content)
+
+    def merge(self, other_chapter):
+        """Merges a chapter's content with this chapter
+
+        :param other_chapter: The other chapter
+        :type other_chapter: class:`Chapter`
+        """
+        self.content += other_chapter.content
+        del other_chapter

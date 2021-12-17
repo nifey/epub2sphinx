@@ -85,11 +85,25 @@ def generate_chapter(chapter_id, book, source_directory):
     :param source_directory: Source directory to extract the file to
     :type source_directory: str
     """
-    chapter = Chapter(book, chapter_id[0])
-    # Convert HTML to ReST
-    chapter.convert()
-    chapter.write(source_directory)
-    return chapter.file
+    chapter_item = book.epub.get_item_with_id(chapter_id[0])
+    file_name = chapter_item.get_name()
+    if file_name in book.subsections:
+        chapter = Chapter(book, chapter_item)
+        chapter.convert()
+        for subchapter_href in book.subsections[file_name]:
+            if subchapter_href != file_name:
+                subchapter = Chapter(book, book.epub.get_item_with_href(subchapter_href))
+                subchapter.convert()
+                subchapter.write(source_directory)
+                chapter.merge(subchapter)
+        chapter.write(source_directory)
+        return chapter.file
+    elif not any(file_name in subsections
+                 for subsections in book.subsections.values()):
+        chapter = Chapter(book, chapter_item)
+        chapter.convert()
+        chapter.write(source_directory)
+        return chapter.file
 
 class Converter:
 
@@ -117,12 +131,12 @@ class Converter:
 
         with ThreadPoolExecutor() as executor:
             # Generate ReST file for each chapter in ebook
-            self.book.toctree = list(tqdm(
+            self.book.toctree = list(filter(None, tqdm(
                 executor.map(lambda x: generate_chapter(x, self.book, self.source_directory),
                              self.book.epub.spine),
                 total=len(self.book.epub.spine),
                 desc="Generating ReST files",
-                colour='Blue'))
+                colour='Blue')))
             # Extract other files from epub
             click.echo("Extracting images")
             list(executor.map(
