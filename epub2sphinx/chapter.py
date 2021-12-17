@@ -4,6 +4,7 @@ import re
 
 href_pattern = re.compile(r"(href=[\"\'][\w/.@-]*html)([#\'\"])")
 svg_pattern = re.compile(r"\<svg[^\>]*\>(.*)\</svg\>", re.MULTILINE|re.DOTALL)
+epub_metadata_pattern = re.compile(r"epub:[a-zA-Z]+=\"[^\"]*\"")
 
 class Chapter:
     """This class represents an XHTML file in the epub's spine.
@@ -34,6 +35,8 @@ class Chapter:
         self.content = self.chapter_item.get_content().decode()
         if self.file in book.chapter_names.keys():
             self.title = book.chapter_names[self.file]
+        elif self.content.find('epub:type="toc"') != -1:
+            self.title = "Table of Contents"
         else:
             self.title = "Front Page"
 
@@ -41,13 +44,11 @@ class Chapter:
         """Convert the XHTML chapter content into ReST
         """
         html_content = re.sub(href_pattern, r"\1.html\2", self.content)
-        if html_content.find("epub:type") != -1:
-            return False
+        html_content = re.sub(epub_metadata_pattern, "", html_content)
         if html_content.find("<svg") != -1:
             html_content = re.sub(svg_pattern, r"\1", html_content)
             html_content = html_content.replace("<image", "<img").replace("xlink:href", "src")
         self.content = pypandoc.convert_text(html_content, 'rst', format='html')
-        return True
 
     def write(self, source_directory):
         """Write the ReST chapter content to output file

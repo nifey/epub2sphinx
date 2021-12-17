@@ -87,9 +87,7 @@ def generate_chapter(chapter_id, book, source_directory):
     """
     chapter = Chapter(book, chapter_id[0])
     # Convert HTML to ReST
-    if not chapter.convert():
-        # Omit chapter from toctree
-        return None
+    chapter.convert()
     chapter.write(source_directory)
     return chapter.file
 
@@ -119,12 +117,12 @@ class Converter:
 
         with ThreadPoolExecutor() as executor:
             # Generate ReST file for each chapter in ebook
-            self.book.toctree = list(filter(None, tqdm(
+            self.book.toctree = list(tqdm(
                 executor.map(lambda x: generate_chapter(x, self.book, self.source_directory),
                              self.book.epub.spine),
                 total=len(self.book.epub.spine),
                 desc="Generating ReST files",
-                colour='Blue')))
+                colour='Blue'))
             # Extract other files from epub
             click.echo("Extracting images")
             list(executor.map(
