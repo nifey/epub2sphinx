@@ -1,7 +1,6 @@
-click==8.0.3
-EbookLib==0.17.1
-lxml==4.6.4
-pypandoc==1.6.4
-six==1.16.0
-Jinja2==3.0.3
-tqdm==4.62.3
+click>=8.0.3
+EbookLib>=0.17.1
+pypandoc>=1.6.4
+Jinja2>=3.0.3
+tqdm>=4.62.3
+sphinx>= 4.4.0

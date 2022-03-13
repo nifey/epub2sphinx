@@ -23,13 +23,6 @@ Built during [FOSSHack 21](https://fossunited.org/fosshack/2021) to solve [this 
   python setup.py install
   ```
 
-- Install Sphinx
-
-  epub2sphinx can generate ReST files without Sphinx, but Sphinx is used to build the HTML files if --build or --serve flags are used.
-  ```bash
-  pip3 install sphinx
-  ```
-
 ## Usage
 ```
 Usage: epub2sphinx <epub_file_name> [-o <output_directory_path>] [-t <sphinx_theme_name>] [-s|--server|-b|--build] [-c]
