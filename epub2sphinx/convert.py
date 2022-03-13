@@ -74,7 +74,7 @@ def extract_item(item, source_directory, extract_style):
             ext_file.write(item.content)
 
 def generate_chapter(chapter_id, book, source_directory):
-    """Generate ReST for each chapter and write to output file
+    """Generate ReST for each chapter
 
     :param chapter_id: ID of the chapter
     :type chapter_id: str
@@ -96,14 +96,44 @@ def generate_chapter(chapter_id, book, source_directory):
                 subchapter.convert()
                 subchapter.write(source_directory)
                 chapter.merge(subchapter)
-        chapter.write(source_directory)
-        return chapter.file
+        return chapter
     elif not any(file_name in subsections
                  for subsections in book.subsections.values()):
         chapter = Chapter(book, chapter_item)
         chapter.convert()
-        chapter.write(source_directory)
-        return chapter.file
+        return chapter
+
+def merge_chapters(chapters):
+    """Merge the unnamed chapters at the beginning and end of the book
+
+    :param chapters: List of chapters
+    :type chapters: list
+    """
+    def merge_range(start_index, end_index):
+        """Merge the chapters present at the given range of indices (both inclusive)
+        """
+        for _ in range(start_index, end_index):
+            chapters[start_index].merge(chapters[start_index+1])
+            del chapters[start_index+1]
+
+    if not chapters[0].title:
+        current_chapter = 1
+        while not chapters[current_chapter].title:
+            current_chapter += 1
+        merge_range(0, current_chapter-1)
+        chapters[0].title = "Front Page"
+
+def write_chapter(chapter, source_directory):
+    """Write chapter to output file
+
+    :param chapter: Chapter to write
+    :type chapter: chapter
+
+    :param source_directory: Source directory to extract the file to
+    :type source_directory: str
+    """
+    chapter.write(source_directory)
+    return chapter.file
 
 class Converter:
 
@@ -131,12 +161,19 @@ class Converter:
 
         with ThreadPoolExecutor() as executor:
             # Generate ReST file for each chapter in ebook
-            self.book.toctree = list(filter(None, tqdm(
+            chapters = list(filter(None, tqdm(
                 executor.map(lambda x: generate_chapter(x, self.book, self.source_directory),
                              self.book.epub.spine),
                 total=len(self.book.epub.spine),
-                desc="Generating ReST files",
+                desc="Generating ReST content",
                 colour='Blue')))
+            merge_chapters(chapters)
+            self.book.toctree = list(tqdm(
+                executor.map(lambda x: write_chapter(x, self.source_directory),
+                             chapters),
+                total=len(chapters),
+                desc="Writing ReST files",
+                colour='Blue'))
             # Extract other files from epub
             click.echo("Extracting images")
             list(executor.map(

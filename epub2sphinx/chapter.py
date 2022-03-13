@@ -38,7 +38,7 @@ class Chapter:
         elif self.content.find('epub:type="toc"') != -1:
             self.title = "Table of Contents"
         else:
-            self.title = "Front Page"
+            self.title = None
 
     def convert(self):
         """Convert the XHTML chapter content into ReST
@@ -58,6 +58,8 @@ class Chapter:
         """
         with open(os.path.join(source_directory, self.file + '.rst'), 'x') as ch_file:
             # Add Chapter title
+            if not self.title:
+                self.title = "Unnamed chapter"
             ch_file.write('*'*len(self.title)+'\n')
             ch_file.write(self.title+'\n')
             ch_file.write('*'*len(self.title)+'\n')
