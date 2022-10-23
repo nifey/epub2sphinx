@@ -1,5 +1,4 @@
 import ebooklib
-import jinja2
 import os
 import shutil
 import click
@@ -10,7 +9,11 @@ from concurrent.futures import ThreadPoolExecutor
 from jinja2 import Environment, PackageLoader
 from tqdm import tqdm
 
+STYLE_TYPES = (ebooklib.ITEM_STYLE, ebooklib.ITEM_FONT)
+IMAGE_TYPES = (ebooklib.ITEM_IMAGE, ebooklib.ITEM_COVER)
+
 templates_directory = os.path.join(os.path.abspath(os.path.dirname(__file__)), "templates")
+
 
 def should_extract_item(item, extract_style):
     """Returns a boolean indicating if this item needs to be extracted
@@ -25,15 +28,9 @@ def should_extract_item(item, extract_style):
     :rtype: bool
     """
     item_type = item.get_type()
-    if (item_type == ebooklib.ITEM_IMAGE or
-        item_type == ebooklib.ITEM_COVER):
-        return True
-    elif (extract_style and
-          (item_type == ebooklib.ITEM_STYLE or
-           item_type == ebooklib.ITEM_FONT)):
-        return True
-    else:
-        return False
+    return ((item_type in IMAGE_TYPES) or
+            (extract_style and item_type in STYLE_TYPES))
+
 
 def get_filename(item, source_directory):
     """Returns the output file name of the item
@@ -48,13 +45,11 @@ def get_filename(item, source_directory):
     :rtype: str
     """
     item_type = item.get_type()
-    if (item_type == ebooklib.ITEM_DOCUMENT or
-        item_type == ebooklib.ITEM_IMAGE or
-        item_type == ebooklib.ITEM_COVER):
+    if item_type in ((ebooklib.ITEM_DOCUMENT,) + (IMAGE_TYPES)):
         return os.path.join(source_directory, item.file_name)
-    elif (item_type == ebooklib.ITEM_STYLE or
-          item_type == ebooklib.ITEM_FONT):
+    elif item_type in STYLE_TYPES:
         return os.path.join(source_directory, "_static", item.file_name)
+
 
 def extract_item(item, source_directory, extract_style):
     """Extracts the Image, CSS or Font file
@@ -72,6 +67,7 @@ def extract_item(item, source_directory, extract_style):
         file_path = get_filename(item, source_directory)
         with open(file_path, 'wb') as ext_file:
             ext_file.write(item.content)
+
 
 def generate_chapter(chapter_id, book, source_directory):
     """Generate ReST for each chapter
@@ -103,6 +99,7 @@ def generate_chapter(chapter_id, book, source_directory):
         chapter.convert()
         return chapter
 
+
 def merge_chapters(chapters):
     """Merge the unnamed chapters at the beginning and end of the book
 
@@ -123,6 +120,7 @@ def merge_chapters(chapters):
         merge_range(0, current_chapter-1)
         chapters[0].title = "Front Page"
 
+
 def write_chapter(chapter, source_directory):
     """Write chapter to output file
 
@@ -135,9 +133,10 @@ def write_chapter(chapter, source_directory):
     chapter.write(source_directory)
     return chapter.file
 
+
 class Converter:
 
-    def __init__(self, file_name, output_directory, sphinx_theme_name,include_custom_css):
+    def __init__(self, file_name, output_directory, sphinx_theme_name, include_custom_css):
         self.book = Book(file_name)
         self.output_directory = output_directory
         self.source_directory = os.path.join(output_directory, 'source')
@@ -148,12 +147,12 @@ class Converter:
     def convert(self):
         # Create output directory structure
         click.echo("Creating directory structure")
-        shutil.copytree(os.path.join(templates_directory,"makefiles"),
+        shutil.copytree(os.path.join(templates_directory, "makefiles"),
                         self.output_directory)
         directories = {os.path.dirname(get_filename(item, self.source_directory))
                        for item in self.book.epub.get_items()
                        if (should_extract_item(item, self.include_custom_css) or
-                          item.get_type() == ebooklib.ITEM_DOCUMENT)}
+                           item.get_type() == ebooklib.ITEM_DOCUMENT)}
         for directory in directories:
             os.makedirs(directory, exist_ok=True)
         self.css_files = [item.file_name for item in self.book.epub.get_items()
@@ -185,10 +184,10 @@ class Converter:
         jinja_env = Environment(
             loader=PackageLoader("epub2sphinx")
         )
-        with open(os.path.join(self.source_directory,'conf.py'), 'x') as cf:
+        with open(os.path.join(self.source_directory, 'conf.py'), 'x') as cf:
             if self.include_custom_css:
                 cf.write(jinja_env.get_template('conf.py').render(book=self.book, theme=self.theme, css_files=self.css_files))
             else:
                 cf.write(jinja_env.get_template('conf.py').render(book=self.book, theme=self.theme))
-        with open(os.path.join(self.source_directory,'index.rst'), 'x') as of:
+        with open(os.path.join(self.source_directory, 'index.rst'), 'x') as of:
             of.write(jinja_env.get_template('index.rst').render(book=self.book))
