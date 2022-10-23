@@ -14,13 +14,13 @@ from epub2sphinx import constants
 @click.option('-t', '--theme', 'sphinx_theme_name', default="alabaster", type=str, prompt=True,
               help=constants.cli_option_theme_help)
 @click.argument('input_file', type=click.File("r"))
-@click.option('-b', '--build', 'post_conversion', flag_value='build', help=constants.cli_option_build_help)
+@click.option('-b/-B', '--build/--no-build', 'build', is_flag=True, default=True, help=constants.cli_option_build_help, show_default=True)
 @click.option('-s', '--serve', 'post_conversion', flag_value='serve', help=constants.cli_option_serve_help)
 @click.option('-c', '--include-custom-css', is_flag=True, help=constants.cli_option_css_help)
 @click.option('--overwrite', is_flag=True, help=constants.cli_option_overwrite_help)
 @click.option('-p', '--port', type=int, default=0, help=constants.cli_option_port_help)
 @click.version_option(package_name='epub2sphinx')
-def convert(output_directory, sphinx_theme_name, input_file, post_conversion, include_custom_css, overwrite, port):
+def convert(output_directory, sphinx_theme_name, input_file, build, post_conversion, include_custom_css, overwrite, port):
     '''\b
         This tool helps you to convert your epub files into sphinx format for a better reading experience.
         Kindly provide the epub file as the argument to this command.
@@ -49,7 +49,7 @@ def convert(output_directory, sphinx_theme_name, input_file, post_conversion, in
     c.convert()
     click.echo("Conversion finished in {:.2f}s".format(time.time() - start_time))
 
-    if post_conversion:
+    if build:
         # Build using Sphinx
         os.chdir(output_directory)
         build_exit_code = subprocess.call(["make html"], shell=True, stdout=subprocess.PIPE)
