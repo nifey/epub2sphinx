@@ -65,14 +65,16 @@ def convert(output_directory, sphinx_theme_name, input_file, build, serve, inclu
 
 def check_port_availability(host: str, port: int):
     """
-    Check if the port provided by the user is available to serve
+    Check if the port provided by the user is available to serve.
+
     :param host: 127.0.0.1
     :param port: 8000
     :return: Bool
     """
     with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
-        return False if sock.connect_ex((host, port)) == 0 else True
-            
+        return sock.connect_ex((host, port)) != 0
+
+
 def default_output_directory(file_name: str) -> str:
     """
     Generate the default output directory path from the given file name in the current working directory.
