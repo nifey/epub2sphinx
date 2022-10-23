@@ -15,12 +15,12 @@ from epub2sphinx import constants
               help=constants.cli_option_theme_help)
 @click.argument('input_file', type=click.File("r"))
 @click.option('-b/-B', '--build/--no-build', 'build', is_flag=True, default=True, help=constants.cli_option_build_help, show_default=True)
-@click.option('-s', '--serve', 'post_conversion', flag_value='serve', help=constants.cli_option_serve_help)
+@click.option('-s', '--serve', 'serve', is_flag=True, help=constants.cli_option_serve_help)
 @click.option('-c', '--include-custom-css', is_flag=True, help=constants.cli_option_css_help)
 @click.option('--overwrite', is_flag=True, help=constants.cli_option_overwrite_help)
 @click.option('-p', '--port', type=int, default=0, help=constants.cli_option_port_help)
 @click.version_option(package_name='epub2sphinx')
-def convert(output_directory, sphinx_theme_name, input_file, build, post_conversion, include_custom_css, overwrite, port):
+def convert(output_directory, sphinx_theme_name, input_file, build, serve, include_custom_css, overwrite, port):
     '''\b
         This tool helps you to convert your epub files into sphinx format for a better reading experience.
         Kindly provide the epub file as the argument to this command.
@@ -55,7 +55,7 @@ def convert(output_directory, sphinx_theme_name, input_file, build, post_convers
         build_exit_code = subprocess.call(["make html"], shell=True, stdout=subprocess.PIPE)
         html_path = os.path.join('build', 'html')
         if build_exit_code == 0 and os.path.isdir(html_path):
-            if post_conversion == 'serve':
+            if serve:
                 # Serve on localhost
                 os.chdir(html_path)
                 # 0 will automatically make use of the next available port

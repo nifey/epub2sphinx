@@ -25,7 +25,7 @@ Built during [FOSSHack 21](https://fossunited.org/fosshack/2021) to solve [this 
 
 ## Usage
 ```
-Usage: epub2sphinx <epub_file_name> [-o <output_directory_path>] [-t <sphinx_theme_name>] [-b,--build|-B,--no-build] [-s|--server] [-c]
+Usage: epub2sphinx <epub_file_name> [-o <output_directory_path>] [-t <sphinx_theme_name>] [-b,--build|-B,--no-build] [-s|--serve] [-c] [-p <port_number>]
 
   This tool helps you to convert your epub files into sphinx format for a better reading experience.
   Kindly provide the epub file as the argument to this command.
