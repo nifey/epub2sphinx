@@ -25,25 +25,25 @@ Built during [FOSSHack 21](https://fossunited.org/fosshack/2021) to solve [this 
 
 ## Usage
 ```
-Usage: epub2sphinx <epub_file_name> [-o <output_directory_path>] [-t <sphinx_theme_name>] [-s|--server|-b|--build] [-c]
+Usage: epub2sphinx <epub_file_name> [-o <output_directory_path>] [-t <sphinx_theme_name>] [-b,--build|-B,--no-build] [-s|--server] [-c]
 
   This tool helps you to convert your epub files into sphinx format for a better reading experience.
   Kindly provide the epub file as the argument to this command.
 
 Options:
-  -o, --output-directory PATH  The name of the output directory where the ReST file will be generated.
-                               Kindly make sure that the given directory is not existing already.
-  -t, --theme TEXT             The name of the sphinx theme.You can check for the available themes at:
-                               <https://www.sphinx-doc.org/en/master/usage/theming.html#builtin-themes>
-  -b, --build                  Build HTML from the generated ReST files using Sphinx.
-                               Sphinx has to be installed for this to work.
-  -s, --serve                  Build HTML using Sphinx and Serve the files on localhost.
-                               Sphinx has to be installed for this to work.
-  -c, --include-custom-css     Include the custom CSS and Fonts from the EPUB for the HTML output
-  -p, --port INTEGER           The port number on which the files will be served after conversion
-  --overwrite                  Overwrite the output directory if present already
-  --version                    Show the version and exit.
-  --help                       Show this message and exit.
+  -o, --output-directory PATH   The name of the output directory where the ReST file will be generated.
+                                Kindly make sure that the given directory is not existing already.
+  -t, --theme TEXT              The name of the sphinx theme.You can check for the available themes at:
+                                <https://www.sphinx-doc.org/en/master/usage/theming.html#builtin-themes>
+  -b, --build / -B, --no-build  Build HTML from the generated ReST files using Sphinx.
+                                Sphinx has to be installed for this to work.  [default: b]
+  -s, --serve                   Build HTML using Sphinx and Serve the files on localhost.
+                                Sphinx has to be installed for this to work.
+  -c, --include-custom-css      Include the custom CSS and Fonts from the EPUB for the HTML output
+  --overwrite                   Overwrite the output directory if present already
+  -p, --port INTEGER            The port number on which the files will be served after conversion
+  --version                     Show the version and exit.
+  --help                        Show this message and exit.
 ```
 ### Example
 ```
