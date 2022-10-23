@@ -31,12 +31,9 @@ def convert(output_directory, sphinx_theme_name, input_file, build, serve, inclu
             click.echo(f"Port {port} is already in use. Aborting!")
             exit(1)
 
-    if not output_directory:
-        output_name = input_file.name.split(os.path.sep)[-1]
-        if output_name.endswith(".epub"):
-            output_name = output_name[:-5]
-        output_directory = os.path.join(os.getcwd(), output_name)
-        click.echo("Writing output to {}".format(output_directory))
+    output_directory = output_directory or default_output_directory(input_file.name)
+    click.echo("Writing output to {}".format(output_directory))
+
     if os.path.isdir(output_directory):
         if overwrite or click.confirm("{} already exists, Do you want to overwrite it?".format(output_directory)):
             shutil.rmtree(output_directory)
@@ -76,3 +73,14 @@ def check_port_availability(host: str, port: int):
     with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
         return False if sock.connect_ex((host, port)) == 0 else True
             
+def default_output_directory(file_name: str) -> str:
+    """
+    Generate the default output directory path from the given file name in the current working directory.
+
+    :param str file_name: The name of the input (EPUB) file
+    :return: the path where the ReST/HTML files should be placed
+    :rtype: str
+    """
+    output_name = file_name.split(os.path.sep)[-1]
+    output_name = output_name.removesuffix('.epub')
+    return os.path.join(os.getcwd(), output_name)
