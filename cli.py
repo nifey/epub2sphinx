@@ -5,6 +5,7 @@ import shutil
 import socket
 import subprocess
 import time
+import tempfile
 from contextlib import closing
 from epub2sphinx import constants
 
@@ -32,6 +33,7 @@ def convert(output_directory, sphinx_theme_name, input_file, build, serve, inclu
             exit(1)
 
     output_directory = output_directory or default_output_directory(input_file.name)
+    output_directory = os.path.abspath(output_directory)
     click.echo("Writing output to {}".format(output_directory))
 
     if os.path.isdir(output_directory):
@@ -41,26 +43,32 @@ def convert(output_directory, sphinx_theme_name, input_file, build, serve, inclu
             click.echo("Aborting")
             exit(1)
 
+    temp_directory = tempfile.TemporaryDirectory()
+    build_directory = os.path.join(temp_directory.name, "output")
     start_time = time.time()
-    c = epub2sphinx.Converter(input_file.name, output_directory, sphinx_theme_name.lower(), include_custom_css)
+    c = epub2sphinx.Converter(input_file.name, build_directory, sphinx_theme_name.lower(), include_custom_css)
     c.convert()
     click.echo("Conversion finished in {:.2f}s".format(time.time() - start_time))
 
     if build:
         # Build using Sphinx
-        os.chdir(output_directory)
+        os.chdir(build_directory)
         build_exit_code = subprocess.call(["make html"], shell=True, stdout=subprocess.PIPE)
         html_path = os.path.join('build', 'html')
         if build_exit_code == 0 and os.path.isdir(html_path):
+            shutil.copytree(html_path, output_directory)
             if serve:
                 # Serve on localhost
-                os.chdir(html_path)
+                os.chdir(output_directory)
                 # 0 will automatically make use of the next available port
                 subprocess.call([f"python -m http.server {port} --bind 127.0.0.1"], shell=True)
             else:
                 click.echo("Build finished successfully")
         else:
             click.echo("Sphinx Build Failed: Something went wrong!")
+    else:
+        shutil.copytree(build_directory, output_directory)
+    temp_directory.cleanup()
 
 
 def check_port_availability(host: str, port: int):
