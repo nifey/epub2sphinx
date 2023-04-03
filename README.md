@@ -1,8 +1,9 @@
 # epub2sphinx
 
-epub2sphinx is a tool to convert epub files to ReST for [Sphinx](https://www.sphinx-doc.org/).
+epub2sphinx is a tool to convert epub files directly into HTML sites using [Pandoc](https://pandoc.org/) and [Sphinx](https://www.sphinx-doc.org/).
+It can use any of pre-existing Sphinx themes (like [these](https://sphinx-themes.org/)) for the generated HTML site.
 
-It uses [Pandoc](https://pandoc.org/) for converting HTML data inside epub files into ReST.
+It uses Pandoc for converting HTML data inside epub files into ReST files and then uses Sphinx to convert them into a HTML site.
 
 It creates a directory structure similar to what `sphinx-quickstart` generates by default.
 
@@ -20,7 +21,7 @@ Built during [FOSSHack 21](https://fossunited.org/fosshack/2021) to solve [this 
 
 - Install epub2sphinx
   ```bash
-  python setup.py install
+  pip install epub2sphinx
   ```
 
 ## Usage

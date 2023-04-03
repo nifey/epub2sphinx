@@ -7,7 +7,7 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
 
 setup(
     name = 'epub2sphinx',
-    version = '0.0.3',
+    version = '0.0.4',
     license = 'MIT',
     description = 'Tool to convert epub to ReST for Sphinx',
     long_description = long_description,
